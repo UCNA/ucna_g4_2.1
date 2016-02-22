@@ -1,0 +1,4 @@
+*.o
+/UCN-build/*
+/analyzed_generator/*
+/scripts/*
