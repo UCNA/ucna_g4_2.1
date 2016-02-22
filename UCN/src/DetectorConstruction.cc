@@ -2,7 +2,7 @@
 #include "GlobalField.hh"
 #include "MWPCField.hh"
 
-#include "G4RunManager.hh"
+/*#include "G4RunManager.hh"
 #include "G4NistManager.hh"
 #include "G4Box.hh"
 #include "G4Cons.hh"
@@ -13,7 +13,7 @@
 #include "G4PVPlacement.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4AutoDelete.hh"
-
+*/
 #include <G4UserLimits.hh>		// stole from Michael Mendenhall's code.
 
 #include <cassert>			// scintillator construction classes
@@ -62,7 +62,8 @@ DetectorConstruction::DetectorConstruction()
 : G4VUserDetectorConstruction(),
   fScintStepLimit(1.0*mm),	// note: fScintStepLimit initialized here
   fStorageIndex(0),	// this variable loops over our TrackerHit names storage index
-  fSourceFoilThick(9.4*um)
+  fSourceFoilThick(9.4*um),
+  fCrinkleAngle(0*rad)
 { }
 
 
@@ -101,65 +102,35 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   Source.dSourceWindowThickness = fSourceFoilThick/2.;	// should be same as source_windowThick = 4.7*um
   Source.Build();
   // And we don't place the source holder object until later.
-
-/*
-  G4double source_windowThick = 4.7*um;
-  G4double source_coatingThick = 0.1*um;
-  G4Material* source_windowMaterial = Mylar;
-  G4Material* source_coatingMaterial = Al;
-  G4double source_holderThick = (3./16.)*inch;
-  G4ThreeVector source_holderPos(0,0,0);
-  G4double source_ringRadius = 0.5*inch;
-  G4double source_windowRadius = source_ringRadius-3.0*mm;
-  G4double source_ringThickness = 3.2*mm;
-  G4double source_holderHeight = 1.5*inch;
-  G4double source_holderWidth = 1.5*inch;
-
-  // source holder container
-  G4Box* source_holderBox = new G4Box("source_holder_box", 0.5*source_holderWidth, 0.5*source_holderHeight, 0.5*source_holderThick);
-  source_container_log = new G4LogicalVolume(source_holderBox, Vacuum, "source_container_log");
-
-  // source holder paddle
-  G4Tubs* source_holderHole = new G4Tubs("source_holder_hole", 0., source_ringRadius, source_holderThick, 0., 2*M_PI);
-  G4SubtractionSolid* source_holder = new G4SubtractionSolid("source holder", source_holderBox, source_holderHole);
-  G4LogicalVolume* source_holder_log = new G4LogicalVolume(source_holder, Brass, "source_holder_log");
-  source_holder_log -> SetVisAttributes(new G4VisAttributes(G4Colour(0.7,0.7,0,0.5)));
-  source_holder_phys = new G4PVPlacement(NULL, G4ThreeVector(), source_holder_log, "source_holder_phys", source_container_log, false, 0);
-
-  // sealed source foil
-  G4Tubs* source_windowTube = new G4Tubs("window_tube", 0., source_windowRadius, source_windowThick, 0., 2*M_PI);
-  source_window_log = new G4LogicalVolume(source_windowTube, source_windowMaterial, "source_window_log");
-  G4VisAttributes* visWindow = new G4VisAttributes(G4Colour(0,1.0,0,1));
-  source_window_log->SetVisAttributes(visWindow);
-  source_window_phys = new G4PVPlacement(NULL, G4ThreeVector(), source_window_log, "source_window_phys", source_container_log, false, 0);
-
-  // source foil coating
-  G4Tubs* source_coating_tube = new G4Tubs("source_coating_tube", 0., source_windowRadius, source_coatingThick*0.5, 0., 2*M_PI);
-  for(int i = 0; i <= 1; i++)	// 0 = EAST, 1 = WEST
-  {
-    source_coating_log[i] = new G4LogicalVolume(source_coating_tube, source_coatingMaterial, Append(i, "source_coating_log"));
-    source_coating_log[i] -> SetVisAttributes(new G4VisAttributes(G4Colour(0,1,0,0.5)));
-  }
-
-  source_coating_phys[0] = new G4PVPlacement(NULL, G4ThreeVector(0,0, (-1)*(source_windowThick + source_coatingThick*0.5)),
-					source_coating_log[0], "source_coating_phys_0", source_container_log, false, 0);
-  source_coating_phys[1] = new G4PVPlacement(NULL, G4ThreeVector(0,0, source_windowThick + source_coatingThick*0.5),
-					source_coating_log[1], "source_coating_phys_1", source_container_log, false, 0);
-
-  // source retaining ring
-  G4Tubs* source_ringTube = new G4Tubs("source_ring_tube", source_windowRadius, source_ringRadius, source_ringThickness/2., 0., 2*M_PI);
-  G4LogicalVolume* source_ring_log = new G4LogicalVolume(source_ringTube, Al, "source_ring_log");
-  source_ring_log -> SetVisAttributes(new G4VisAttributes(G4Colour(0.7,0.7,0.7,0.5)));
-  source_ring_phys = new G4PVPlacement(NULL, G4ThreeVector(), source_ring_log, "source_ring_phys", source_container_log, false, 0);
-*/
-
-  // place entire source holder object. Comment these two lines out if don't want to use the source holder geom.
 //  source_phys = new G4PVPlacement(NULL, source_holderPos, source_container_log, "source_container_phys",
-//				 experimentalHall_log, false, 0, true);
+//                               experimentalHall_log, false, 0, true);
+
 
   //----- Decay Trap object (length 3m, main tube)
+  Trap.dWindowThick = 0.150*um;	// M.Brown sets these before we enter geometry choice
+  Trap.dCoatingThick = 0.500*um;
+
+  // 2011/2012 geometry settings are:
+  Trap.dWindowThick = 0.500*um;
+  Trap.mDecayTrapWindowMat = Mylar;
+  Trap.dInnerRadiusOfCollimator = 2.3*inch;
+  Trap.dCollimatorThick = 0.7*inch;
+  // Stuff pertaining to wirechamber volume cathode/anode radius
+  G4double wireVol_anodeRadius = 5*um;
+  G4double wireVol_cathodeRadius = 39.1*um;
+
+  // make the DecayTrapConstruction object.
+  Trap.Build(experimentalHall_log, fCrinkleAngle);
+
+//  G4RotationMatrix* EastSideRot = new G4RotationMatrix();
+//  EastSideRot -> rotateY(M_PI*rad);
+
+
+
+  //----- Decay Trap object (length 3m, main tube)
+/*
 //  G4double decayTrap_windowThick = 0.180*um;	// from thin foil geometry configuration
-  G4double decayTrap_coatingThick = 0.150*um;	// in M.M.'s code.
+//  G4double decayTrap_coatingThick = 0.150*um;	// in M.M.'s code.
   G4double decayTrap_innerRadiusOfTrap = 2.45*inch;
   G4double decayTrap_tubeWallThick = 2*mm;
 //  G4double decayTrap_innerRadiusCollimator = 2.3*inch;
@@ -168,6 +139,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // All the appropriate variables have been commented out everywhere else.
   // Note: some of these values take the same value as previously declared (commented out)
   G4double decayTrap_windowThick = 0.500*um;
+  G4double decayTrap_coatingThick = 0.50*um;	// M.Brown's pre-geometry set.
   G4Material* decayTrap_windowMaterial = Mylar;
   G4double decayTrap_innerRadiusCollimator = 2.3*inch;
   G4double decayTrap_collimatorThick = 0.7*inch;
@@ -253,7 +225,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
                         "collimator_back_1", experimentalHall_log, false, 0);
   new G4PVPlacement(NULL, G4ThreeVector(0,0, decayTrap_monitor_PosZ), decayTrap_innerMonitors_log[1],
                         "trap_monitor_1", experimentalHall_log, false, 0);
-
+*/
   //----- Scintillator construction. Used as Sensitive Volume
   G4double scint_scintRadius = 7.5*cm;
   G4double scint_scintBackingRadius = 10*cm;
@@ -605,7 +577,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   for(int i = 0; i <= 1; i++)			// set user limits in specific volumes
   {
-    decayTrap_window_log[i] -> SetUserLimits(UserSolidLimits);
+//    decayTrap_window_log[i] -> SetUserLimits(UserSolidLimits);
+    Trap.decayTrapWin_log[i] -> SetUserLimits(UserSolidLimits);
     mwpc_container_log[i] -> SetUserLimits(UserGasLimits);
     mwpc_winIn_log[i] -> SetUserLimits(UserSolidLimits);
     mwpc_winOut_log[i] -> SetUserLimits(UserSolidLimits);
