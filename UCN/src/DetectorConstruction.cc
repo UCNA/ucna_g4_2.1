@@ -2,10 +2,9 @@
 #include "GlobalField.hh"
 #include "MWPCField.hh"
 
-#include <G4UserLimits.hh>		// stole from Michael Mendenhall's code.
+#include <G4Polycone.hh>	// SCINT. get rid of this when you're done porting over.
 
-#include <cassert>			// scintillator construction classes
-#include <G4Polycone.hh>
+#include <G4UserLimits.hh>		// stole from Michael Mendenhall's code.
 
 #include <math.h>			// Used in WirechamberConstruction
 #include <G4FieldManager.hh>
@@ -52,7 +51,9 @@ DetectorConstruction::DetectorConstruction()
   fStorageIndex(0),	// this variable loops over our TrackerHit names storage index
   fSourceFoilThick(9.4*um),
   fCrinkleAngle(0*rad)
-{ }
+{
+
+}
 
 
 DetectorConstruction::~DetectorConstruction()
@@ -110,110 +111,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // make the DecayTrapConstruction object.
   Trap.Build(experimentalHall_log, fCrinkleAngle);
 
-//  G4RotationMatrix* EastSideRot = new G4RotationMatrix();
-//  EastSideRot -> rotateY(M_PI*rad);
-
-
-
-  //----- Decay Trap object (length 3m, main tube)
-/*
-//  G4double decayTrap_windowThick = 0.180*um;	// from thin foil geometry configuration
-//  G4double decayTrap_coatingThick = 0.150*um;	// in M.M.'s code.
-  G4double decayTrap_innerRadiusOfTrap = 2.45*inch;
-  G4double decayTrap_tubeWallThick = 2*mm;
-//  G4double decayTrap_innerRadiusCollimator = 2.3*inch;
-
-  // Michael Brown's changes that form the 2011/2012 detector geometry
-  // All the appropriate variables have been commented out everywhere else.
-  // Note: some of these values take the same value as previously declared (commented out)
-  G4double decayTrap_windowThick = 0.500*um;
-  G4double decayTrap_coatingThick = 0.50*um;	// M.Brown's pre-geometry set.
-  G4Material* decayTrap_windowMaterial = Mylar;
-  G4double decayTrap_innerRadiusCollimator = 2.3*inch;
-  G4double decayTrap_collimatorThick = 0.7*inch;
-  G4double wireVol_anodeRadius = 5*um;
-  G4double wireVol_cathodeRadius = 39.1*um;
-
-  G4Material* decayTrap_tubeMaterial = Cu;
-  G4Material* decayTrap_collimatorMaterial = Polyethylene;
-//  G4Material* decayTrap_windowMaterial = Mylar;
-  G4Material* decayTrap_coatingMaterial = Be;
-
-  // decay tube construction
-  G4double decayTrap_tube_outerRadius = decayTrap_innerRadiusOfTrap + decayTrap_tubeWallThick;
-  G4double decayTrap_tube_length = 3.0*m;
-
-  G4Tubs* decayTrap_tube = new G4Tubs("decayTrap_tube", decayTrap_innerRadiusOfTrap, decayTrap_tube_outerRadius,
-					decayTrap_tube_length/2., 0., 2*M_PI);
-  decayTrap_tube_log = new G4LogicalVolume(decayTrap_tube, decayTrap_tubeMaterial, "decayTrap_tube_log");
-  decayTrap_tube_log -> SetVisAttributes(new G4VisAttributes(G4Colour(1,1,0,0.5)));
-  new G4PVPlacement(NULL, G4ThreeVector(), decayTrap_tube_log, "decayTrap_tube", experimentalHall_log, false, 0, true);
-
-  // decay trap windows, collimator, monitors
-  G4double decayTrap_totalWindowThickness = decayTrap_windowThick + decayTrap_coatingThick;
-//  G4double decayTrap_collimatorThick = 0.8*inch;
-  G4double decayTrap_beWindow_PosZ = -decayTrap_totalWindowThickness/2. + decayTrap_coatingThick/2.;
-  G4double decayTrap_mylarWindow_PosZ = decayTrap_totalWindowThickness/2. - decayTrap_windowThick/2.;
-  G4double decayTrap_window_PosZ = (decayTrap_tube_length + decayTrap_totalWindowThickness)/2.;
-  G4double decayTrap_monitorThickness = 1.0*mm;
-  G4double decayTrap_monitor_PosZ = 0.5*m;
-
-  G4Tubs* decayTrap_trapWindowTube = new G4Tubs("trap_win_tube", 0., decayTrap_tube_outerRadius, decayTrap_totalWindowThickness/2., 0, 2*M_PI);
-  G4Tubs* decayTrap_mylarTube = new G4Tubs("mylarTube", 0., decayTrap_tube_outerRadius, decayTrap_windowThick/2., 0., 2*M_PI);
-  G4Tubs* decayTrap_beTube = new G4Tubs("beTube", 0., decayTrap_tube_outerRadius, decayTrap_coatingThick/2., 0., 2*M_PI);
-  G4Tubs* decayTrap_collimatorTube = new G4Tubs("decayTrap_collimatorTube", decayTrap_innerRadiusCollimator,
-				decayTrap_innerRadiusCollimator + decayTrap_collimatorThick, decayTrap_collimatorThick/2.,0., 2*M_PI);
-  G4Tubs* decayTrap_collimatorBackTube = new G4Tubs("decayTrap_collimatorBackTube", decayTrap_tube_outerRadius + 1.*mm,
-				decayTrap_innerRadiusCollimator + decayTrap_collimatorThick, decayTrap_collimatorThick/2., 0., 2*M_PI);
-  G4Tubs* decayTrap_monitorTube = new G4Tubs("trap_monitor_tube", 0., decayTrap_innerRadiusOfTrap, decayTrap_monitorThickness/2.0,
-					0., 2*M_PI);
-
-  for(int i = 0; i <= 1; i++)
-  {
-    decayTrap_window_log[i] = new G4LogicalVolume(decayTrap_trapWindowTube, Vacuum, Append(i, "trap_win_log_"));
-    decayTrap_window_log[i] -> SetVisAttributes(visWindow);
-    decayTrap_mylarWindow_log[i] = new G4LogicalVolume(decayTrap_mylarTube, decayTrap_windowMaterial, Append(i, "mylar_win_log_"));
-    decayTrap_beWindow_log[i] = new G4LogicalVolume(decayTrap_beTube, decayTrap_coatingMaterial, Append(i, "be_win_log"));
-  }
-  new G4PVPlacement(NULL, G4ThreeVector(0.,0.,(-1)*decayTrap_window_PosZ), decayTrap_window_log[0], "trap_win_0",
-			experimentalHall_log, false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0,0, decayTrap_window_PosZ), decayTrap_window_log[1], "trap_win_1",
-			experimentalHall_log, false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0., 0., (-1)*decayTrap_mylarWindow_PosZ), decayTrap_mylarWindow_log[0],
-			"mylar_win_0", decayTrap_window_log[0], false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0., 0., (-1)*decayTrap_beWindow_PosZ), decayTrap_beWindow_log[0],
-			"be_win_0", decayTrap_window_log[0], false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0., 0., decayTrap_mylarWindow_PosZ), decayTrap_mylarWindow_log[1],
-                        "mylar_win_1", decayTrap_window_log[1], false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0., 0., decayTrap_beWindow_PosZ), decayTrap_beWindow_log[1],
-                        "be_win_1", decayTrap_window_log[1], false, 0);
-
-  G4double decayTrap_collimator_PosZ = (decayTrap_tube_length + decayTrap_collimatorThick)/2.;
-  decayTrap_collimator_PosZ += (decayTrap_totalWindowThickness)/2.;
-  G4double decayTrap_collimatorBack_PosZ = decayTrap_tube_length/2. - decayTrap_collimatorThick;
-  for(int i = 0; i <= 1; i++)
-  {
-    decayTrap_collimator_log[i] = new G4LogicalVolume(decayTrap_collimatorTube, decayTrap_collimatorMaterial,
-							Append(i, "collimator_log_"));
-    decayTrap_collimatorBack_log[i] = new G4LogicalVolume(decayTrap_collimatorBackTube, decayTrap_collimatorMaterial,
-							Append(i, "collimator_back_log_"));
-    decayTrap_innerMonitors_log[i] = new G4LogicalVolume(decayTrap_monitorTube, Vacuum, Append(i, "trap_monitor_log_"));
-  }
-  // place everything at -z i.e. EAST.
-  new G4PVPlacement(NULL, G4ThreeVector(0, 0, (-1)*decayTrap_collimator_PosZ), decayTrap_collimator_log[0],
-			"collimator_0", experimentalHall_log, false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0,0, (-1)*decayTrap_collimatorBack_PosZ), decayTrap_collimatorBack_log[0],
-			"collimator_back_0", experimentalHall_log, false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0,0, (-1)*decayTrap_monitor_PosZ), decayTrap_innerMonitors_log[0],
-			"trap_monitor_0", experimentalHall_log, false, 0);
-  // copy but place at +z i.e. WEST
-  new G4PVPlacement(NULL, G4ThreeVector(0, 0, decayTrap_collimator_PosZ), decayTrap_collimator_log[1],
-                        "collimator_1", experimentalHall_log, false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0,0, decayTrap_collimatorBack_PosZ), decayTrap_collimatorBack_log[1],
-                        "collimator_back_1", experimentalHall_log, false, 0);
-  new G4PVPlacement(NULL, G4ThreeVector(0,0, decayTrap_monitor_PosZ), decayTrap_innerMonitors_log[1],
-                        "trap_monitor_1", experimentalHall_log, false, 0);
-*/
   //----- Scintillator construction. Used as Sensitive Volume
   G4double scint_scintRadius = 7.5*cm;
   G4double scint_scintBackingRadius = 10*cm;
@@ -288,8 +185,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   EastSideRot -> rotateY(M_PI*rad);
 
   // Place the two scintillator containers. Rotate the EAST one so they both face towards the center.
-  scint_container_phys[0] = new G4PVPlacement(EastSideRot, sideTransScintEast, scint_container_log[0],
-				"scint_container_phys_EAST", experimentalHall_log, false, 0, true);
+//  scint_container_phys[0] = new G4PVPlacement(EastSideRot, sideTransScintEast, scint_container_log[0],
+//				"scint_container_phys_EAST", experimentalHall_log, false, 0, true);
+  Scint.Build(0);	// 0 = EAST
+  scint_phys_EAST = new G4PVPlacement(EastSideRot, G4ThreeVector(0,0, (-1)*(2.2*m - Scint.GetScintFacePos())),
+				Scint.container_log, "scintContainer_EAST", experimentalHall_log, false, 0, true);
+
   scint_container_phys[1] = new G4PVPlacement(NULL, sideTransScintWest, scint_container_log[1],
 				"scint_container_phys_WEST", experimentalHall_log, false, 0, true);
 

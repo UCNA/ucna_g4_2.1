@@ -5,6 +5,7 @@
 #include "DetectorConstructionUtils.hh"
 #include "SourceHolderConstruction.hh"
 #include "DecayTrapConstruction.hh"
+#include "ScintillatorConstruction.hh"
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
@@ -41,17 +42,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
 
     DecayTrapConstruction Trap;
 
-/*
-    G4LogicalVolume* source_container_log;
-    G4LogicalVolume* source_window_log;
-    G4LogicalVolume* source_coating_log[2];	*/
-    G4LogicalVolume* decayTrap_tube_log;
-    G4LogicalVolume* decayTrap_window_log[2];
-    G4LogicalVolume* decayTrap_mylarWindow_log[2];
-    G4LogicalVolume* decayTrap_beWindow_log[2];
-    G4LogicalVolume* decayTrap_collimator_log[2];
-    G4LogicalVolume* decayTrap_collimatorBack_log[2];
-    G4LogicalVolume* decayTrap_innerMonitors_log[2];
+    ScintillatorConstruction Scint;
+    G4VPhysicalVolume* scint_phys_EAST;
+
     G4LogicalVolume* scint_container_log[2];
     G4LogicalVolume* scint_deadLayer_log[2];
     G4LogicalVolume* scint_scintillator_log[2];
@@ -82,11 +75,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
     G4String fHCNamesArray[fNbSDs];
 
   protected:
-/*    G4VPhysicalVolume* source_holder_phys;
-    G4VPhysicalVolume* source_window_phys;
-    G4VPhysicalVolume* source_coating_phys[2];
-    G4VPhysicalVolume* source_ring_phys;
-    G4VPhysicalVolume* source_phys;	*/
     G4VPhysicalVolume* scint_deadLayer_phys[2];
     G4VPhysicalVolume* scint_scintillator_phys[2];
     G4VPhysicalVolume* scint_lightGuide_phys[2];
