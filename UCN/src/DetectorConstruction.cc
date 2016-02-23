@@ -2,7 +2,7 @@
 #include "GlobalField.hh"
 #include "MWPCField.hh"
 
-#include <G4Polycone.hh>	// SCINT. get rid of this when you're done porting over.
+//#include <G4Polycone.hh>	// SCINT. get rid of this when you're done porting over.
 
 #include <G4UserLimits.hh>		// stole from Michael Mendenhall's code.
 
@@ -112,7 +112,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   Trap.Build(experimentalHall_log, fCrinkleAngle);
 
   //----- Scintillator construction. Used as Sensitive Volume
-  G4double scint_scintRadius = 7.5*cm;
+/*  G4double scint_scintRadius = 7.5*cm;
   G4double scint_scintBackingRadius = 10*cm;
   G4double scint_scintThick = 3.5*mm;
   G4double scint_deadLayerThick = 3.0*um;
@@ -178,21 +178,30 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     scint_backing_phys[i] = new G4PVPlacement(NULL, G4ThreeVector(0,0, (scint_N2Volume_Z - scint_scintBackingThick)/2.),
                                 scint_backing_log[i], Append(i, "backing_phys_"), scint_container_log[i], false, 0);
   }
-
-  G4ThreeVector sideTransScintEast = G4ThreeVector(0., 0., (-1)*(2.2*m - scint_face_PosZ));
-  G4ThreeVector sideTransScintWest = G4ThreeVector(0., 0., (2.2*m - scint_face_PosZ));
+*/
+//  G4ThreeVector sideTransScintEast = G4ThreeVector(0., 0., (-1)*(2.2*m - scint_face_PosZ));
+//  G4ThreeVector sideTransScintWest = G4ThreeVector(0., 0., (2.2*m - scint_face_PosZ));
   G4RotationMatrix* EastSideRot = new G4RotationMatrix();
   EastSideRot -> rotateY(M_PI*rad);
 
   // Place the two scintillator containers. Rotate the EAST one so they both face towards the center.
 //  scint_container_phys[0] = new G4PVPlacement(EastSideRot, sideTransScintEast, scint_container_log[0],
 //				"scint_container_phys_EAST", experimentalHall_log, false, 0, true);
-  Scint.Build(0);	// 0 = EAST
-  scint_phys_EAST = new G4PVPlacement(EastSideRot, G4ThreeVector(0,0, (-1)*(2.2*m - Scint.GetScintFacePos())),
-				Scint.container_log, "scintContainer_EAST", experimentalHall_log, false, 0, true);
+//  scint_container_phys[1] = new G4PVPlacement(NULL, sideTransScintWest, scint_container_log[1],
+//				"scint_container_phys_WEST", experimentalHall_log, false, 0, true);
 
-  scint_container_phys[1] = new G4PVPlacement(NULL, sideTransScintWest, scint_container_log[1],
-				"scint_container_phys_WEST", experimentalHall_log, false, 0, true);
+
+  for(int i = 0; i <= 1; i++)
+  {
+    Scint[i].Build(i);
+  }
+  scint_phys[0] = new G4PVPlacement(EastSideRot, G4ThreeVector(0,0, Sign(0)*(2.2*m - Scint[0].GetScintFacePos())),
+                                Scint[0].container_log, "scintContainer_EAST", experimentalHall_log, false, 0, true);
+  scint_phys[1] = new G4PVPlacement(NULL, G4ThreeVector(0,0, Sign(1)*(2.2*m - Scint[1].GetScintFacePos())),
+                                Scint[1].container_log, "scintContainer_WEST", experimentalHall_log, false, 0, true);
+
+
+
 
   //----- Begin Wire volume construction. Active region inside wire chamber.
 //  G4double wireVol_anodeRadius = 5*um;
@@ -351,7 +360,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   }
 
   G4double frame_backWinFrameThick = 0.5*inch;	// originally placed further down but needed here
-  G4double mwpc_PosZ = -mwpc_containerHalf_Z - frame_backWinFrameThick - (scint_N2Volume_Z/2. + scint_face_PosZ);
+//  G4double mwpc_PosZ = -mwpc_containerHalf_Z - frame_backWinFrameThick - (scint_N2Volume_Z/2. + scint_face_PosZ);
+
+  G4double mwpc_PosZ = -mwpc_containerHalf_Z - frame_backWinFrameThick
+		- (Scint[0].GetWidth()/2. + Scint[0].GetScintFacePos());
+
   G4ThreeVector sideTransMWPCEast = G4ThreeVector(0,0, (-1)*(2.2*m + mwpc_PosZ));
   G4ThreeVector sideTransMWPCWest = G4ThreeVector(0, 0, (2.2*m + mwpc_PosZ));
 
@@ -386,10 +399,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double frame_detFrameHalf_Z = frame_mwpcEntranceDepth + 2*mwpc_containerHalf_Z + 1.0*inch;
   G4Tubs* frame_framePackageTube = new G4Tubs("detPackage_tube_EAST", 0, frame_packageRadius, frame_detFrameHalf_Z, 0, 2*M_PI);
 
+  // Overall container layer for the scintillator
+  G4Tubs* scint_N2VolTube = new G4Tubs("N2_vol_tube", 0., Scint[0].dBackingRadius, Scint[0].GetWidth()/2., 0., 2*M_PI);
+
   // subtract off the scintillator container volume. Not rotated (since frame will be made and then rotated).
   // But displaced by -scint_face_PosZ relative to the local coordinates of the detector package frame.
   G4SubtractionSolid* frame_frameMinusScint = new G4SubtractionSolid("DPC_frame_minus_scint_container_log", frame_framePackageTube,
-					scint_N2VolTube, NULL, G4ThreeVector(0., 0., -scint_face_PosZ));
+					scint_N2VolTube, NULL, G4ThreeVector(0., 0., -Scint[0].GetScintFacePos()));
   // subtract off the mwpc container volume. Not rotated (since frame will be made then rotated).
   G4SubtractionSolid* frame_containerShape = new G4SubtractionSolid("frame_container_minus_Scint_MWPC", frame_frameMinusScint,
 					mwpc_containerBox, NULL, G4ThreeVector(0., 0., mwpc_PosZ));
@@ -478,7 +494,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   for(int i = 0; i <= 1; i++)
   {
     SD_scint_scintillator[i] = RegisterSD(Append(i, "SD_scint_"), Append(i, "HC_scint_"));
-    scint_scintillator_log[i] -> SetSensitiveDetector(SD_scint_scintillator[i]);
+    Scint[i].scintillator_log -> SetSensitiveDetector(SD_scint_scintillator[i]);
+//    scint_scintillator_log[i] -> SetSensitiveDetector(SD_scint_scintillator[i]);
 
 /*    SD_scint_deadScint[i] = RegisterSD(Append(i, "SD_deadScint_"));
     scint_deadLayer_log[i] -> SetSensitiveDetector(SD_scint_deadScint[i]);
