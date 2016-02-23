@@ -2,18 +2,6 @@
 #include "GlobalField.hh"
 #include "MWPCField.hh"
 
-/*#include "G4RunManager.hh"
-#include "G4NistManager.hh"
-#include "G4Box.hh"
-#include "G4Cons.hh"
-#include "G4Orb.hh"
-#include "G4Sphere.hh"
-#include "G4Trd.hh"
-#include "G4LogicalVolume.hh"
-#include "G4PVPlacement.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4AutoDelete.hh"
-*/
 #include <G4UserLimits.hh>		// stole from Michael Mendenhall's code.
 
 #include <cassert>			// scintillator construction classes
@@ -107,8 +95,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 
   //----- Decay Trap object (length 3m, main tube)
-  Trap.dWindowThick = 0.150*um;	// M.Brown sets these before we enter geometry choice
-  Trap.dCoatingThick = 0.500*um;
+  Trap.dWindowThick = 0.50*um;	// M.Brown sets these before we enter geometry choice
+  Trap.dCoatingThick = 0.150*um;
 
   // 2011/2012 geometry settings are:
   Trap.dWindowThick = 0.500*um;
