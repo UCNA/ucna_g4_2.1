@@ -305,8 +305,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     Wirechamber[i].Build(i);
   }
 
-  G4cout << "value of dMWPCContainerHalf_Z " << (Wirechamber[0].GetWidth()/2.)/cm << " cm" << G4endl;
-
   G4Box* mwpc_containerBox = new G4Box("mwpc_container_box", 4*inch, 4*inch, (Wirechamber[0].GetWidth())/2.);
   G4double mwpc_exitRadius = Wirechamber[0].dMWPCExitR;
   G4double mwpc_entranceRadius = Wirechamber[0].dMWPCEntranceR;
@@ -322,9 +320,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4ThreeVector sideTransMWPCEast = G4ThreeVector(0,0, (-1)*(2.2*m + mwpc_PosZ));
   G4ThreeVector sideTransMWPCWest = G4ThreeVector(0, 0, (2.2*m + mwpc_PosZ));
 
-
-
-
   mwpc_phys[0] = new G4PVPlacement(EastSideRot, sideTransMWPCEast, Wirechamber[0].container_log,
 				"mwpcContainer_phys_EAST", experimentalHall_log, false, 0, true);
   mwpc_phys[1] = new G4PVPlacement(NULL, sideTransMWPCWest, Wirechamber[1].container_log,
@@ -332,8 +327,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 
 
-  //----- Begin DetectorPackageConstruction. This is the frame that holds the scintillator and MWPC.
 
+  //----- Begin DetectorPackageConstruction. This is the frame that holds the scintillator and MWPC.
   G4double frame_packageRadius = 6.0*inch;
   G4double frame_mwpcEntranceThick = 0.375*inch;
   G4double frame_mwpcEntranceRadius = 3.0*inch;	// not the same value as mwpc_entranceRadius
@@ -443,6 +438,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   for(int i = 0; i <= 1; i++)			// set user limits in specific volumes
   {
     Trap.decayTrapWin_log[i] -> SetUserLimits(UserSolidLimits);
+    Wirechamber[i].container_log -> SetUserLimits(UserGasLimits);
+    Wirechamber[i].winIn_log -> SetUserLimits(UserSolidLimits);
+    Wirechamber[i].winOut_log -> SetUserLimits(UserSolidLimits);
+    Wirechamber[i].kevStrip_log -> SetUserLimits(UserSolidLimits);
 /*    mwpc_container_log[i] -> SetUserLimits(UserGasLimits);
     mwpc_winIn_log[i] -> SetUserLimits(UserSolidLimits);
     mwpc_winOut_log[i] -> SetUserLimits(UserSolidLimits);
@@ -525,9 +524,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4ThreeVector East_EMFieldLocation = mwpc_activeRegionTrans + sideTransMWPCEast;
   G4ThreeVector West_EMFieldLocation = mwpc_activeRegionTrans + sideTransMWPCWest;
 
-
-  G4cout << "What about here?" << G4endl;
-
   ConstructGlobalField();			// make magnetic and EM fields.
 
   ConstructEastMWPCField(Wirechamber[0].ActiveRegion.dWireSpacing,
@@ -544,7 +540,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 			mwpc_fieldE0, EastSideRot, East_EMFieldLocation);
   ConstructWestMWPCField(wireVol_wireSpacing, wireVol_planeSpacing, wireVol_anodeRadius,
 			mwpc_fieldE0, NULL, West_EMFieldLocation); */
-  G4cout << "Make it to the end? " << G4endl;
   return experimentalHall_phys;
 }
 

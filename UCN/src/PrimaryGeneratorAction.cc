@@ -28,8 +28,6 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
   fSourceRadius(0),
   fPosOffset(G4ThreeVector(0,0,0))	// if it's not a source, then set to 0
 {
-  G4cout << "PrimaryGeneratorAction constructor beginning" << G4endl;
-
   G4int nPtcls = 1;
   fParticleGun = new G4ParticleGun(nPtcls);
 

@@ -26,8 +26,6 @@ TrackerSD::TrackerSD(G4String sdname, G4String hcname):
   // which is the name of the hits collection defined in teh sensitive detector object.
   // In the constructor, the name of the hits collection must be defined.
   collectionName.insert(hcname);
-
-  G4cout << "TrackerSD constructor end" << G4endl;
 }
 
 // quenching calculation... see Junhua's thesis
@@ -43,8 +41,6 @@ double TrackerSD::QuenchFactor(double E) const
 // and set it to the G4HCofThisEvent object
 void TrackerSD::Initialize(G4HCofThisEvent* hce)
 {
-  G4cout << "Begin the initialize method of trackersd" << G4endl;
-
   // make a new hits collection and register it for this event
   fHitsCollection = new TrackerHitsCollection(SensitiveDetectorName,collectionName[0]);
   G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(fHitsCollection);

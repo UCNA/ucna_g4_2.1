@@ -27,8 +27,6 @@ RunAction::~RunAction()
 
 void RunAction::BeginOfRunAction(const G4Run* run)
 {
-  G4cout << "Begin of run action. " << G4endl;
-
   fKillCount = 0;
 
   // prints header file
