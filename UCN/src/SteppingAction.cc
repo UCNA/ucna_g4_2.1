@@ -12,9 +12,7 @@
 SteppingAction::SteppingAction(EventAction* eventAction)
 : G4UserSteppingAction(),
   fEventAction(eventAction)
-{
-  G4cout << "Stepping action?" << G4endl;
-}
+{ }
 
 
 SteppingAction::~SteppingAction()

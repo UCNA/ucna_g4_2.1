@@ -19,6 +19,8 @@ public:
   G4double dLightGuideThick;	// light guide thickness at scintillator edge (M.M's guess)
 				// ^^ sets scintillator to backing distance
 
+  G4Tubs* scintOverall_shape;	// container shape for entire scintillatorConstruction
+
   G4LogicalVolume* container_log;	// overall container volume (filled with nitrogen)
   G4LogicalVolume* deadLayer_log;	// scintillator dead layer logical volume
   G4LogicalVolume* scintillator_log;	// actual scintillator (active region) volume

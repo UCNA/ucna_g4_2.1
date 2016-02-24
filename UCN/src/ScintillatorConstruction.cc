@@ -21,6 +21,8 @@ void ScintillatorConstruction::Build(int side)
   // Overall container layer for the scintillator
   G4Tubs* N2VolTube = new G4Tubs("N2_vol_tube", 0., dBackingRadius, dN2Volume_Z/2., 0., 2*M_PI);
 
+  scintOverall_shape = N2VolTube;	// NEW LINE
+
   // dead layer in scint
   G4Tubs* deadLayerTube = new G4Tubs("Dead_scint_tube", 0, dScintRadius, dDeadThick/2., 0., 2*M_PI);
   G4VisAttributes* visDScint= new G4VisAttributes(G4Colour(1.0,0.0,1.0,0.5));

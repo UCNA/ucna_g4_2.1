@@ -7,6 +7,7 @@
 #include "DecayTrapConstruction.hh"
 #include "ScintillatorConstruction.hh"
 #include "WirechamberConstruction.hh"
+#include "FrameConstruction.hh"
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
@@ -49,34 +50,24 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
     WirechamberConstruction Wirechamber[2];
     G4VPhysicalVolume* mwpc_phys[2];
 
+    FrameConstruction Frame[2];
+    G4VPhysicalVolume* frame_phys[2];
 
-    G4LogicalVolume* wireVol_gas_log[2];
-    G4LogicalVolume* wireVol_cathSeg_log[2];
-    G4LogicalVolume* wireVol_anodeSeg_log[2];
-    G4LogicalVolume* wireVol_cathodeWire_log[2];
-    G4LogicalVolume* wireVol_cathPlate_log[2];
-    G4LogicalVolume* wireVol_anodeWire_log[2];
-    G4LogicalVolume* mwpc_container_log[2];
-    G4LogicalVolume* mwpc_kevContainer_log[2];
-    G4LogicalVolume* mwpc_kevSeg_log[2];
-    G4LogicalVolume* mwpc_kevStrip_log[2];
-    G4LogicalVolume* mwpc_winIn_log[2];
-    G4LogicalVolume* mwpc_winOut_log[2];
-    G4LogicalVolume* frame_mwpcEntrance_log[2];
+
+/*    G4LogicalVolume* frame_mwpcEntrance_log[2];
     G4LogicalVolume* frame_entranceFront_log[2];
     G4LogicalVolume* frame_entranceMid_log[2];
     G4LogicalVolume* frame_entranceBack_log[2];
     G4LogicalVolume* frame_container_log[2];
     G4LogicalVolume* frame_mwpcExit_log[2];
     G4LogicalVolume* frame_mwpcExitGasN2_log[2];
-    G4LogicalVolume* frame_backStuff_log[2];
+    G4LogicalVolume* frame_backStuff_log[2]; */
 
     G4String fSDNamesArray[fNbSDs];	// needs to be public since EventAction will access all elements
     G4String fHCNamesArray[fNbSDs];
 
   protected:
-    G4VPhysicalVolume* mwpc_container_phys[2];
-    G4VPhysicalVolume* frame_entranceFront_phys[2];
+/*    G4VPhysicalVolume* frame_entranceFront_phys[2];
     G4VPhysicalVolume* frame_entranceMid_phys[2];
     G4VPhysicalVolume* frame_entranceBack_phys[2];
     G4VPhysicalVolume* frame_mwpcExit_phys[2];
@@ -84,7 +75,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
     G4VPhysicalVolume* frame_backStuff_phys[2];
     G4VPhysicalVolume* frame_mwpcEntrance_phys[2];
     G4VPhysicalVolume* frame_container_phys[2];
-
+*/
   private:
     void ConstructGlobalField();
     void ConstructEastMWPCField(G4double a, G4double b, G4double c, G4double d,

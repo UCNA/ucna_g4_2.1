@@ -8,7 +8,7 @@
 #include <G4MagneticField.hh>
 #include <G4RotationMatrix.hh>
 
-class WirechamberConstruction: public MaterialUser, G4ElectroMagneticField
+class WirechamberConstruction: public MaterialUser
 {
 public:
   WirechamberConstruction();	// constructor
@@ -25,6 +25,8 @@ public:
 
   WirechamberActiveRegionConstruction ActiveRegion;	// active gas region with wireplanes
 
+  G4Box* mwpcOverall_shape;	// container shape for entire WirechamberConstruction
+
   G4LogicalVolume* container_log;	// overall gas box
   G4LogicalVolume* kevContainer_log;	// container volume for kevlar strip array
   G4LogicalVolume* kevSeg_log;		// one segment of kevlay strip array
@@ -33,24 +35,13 @@ public:
   G4LogicalVolume* winOut_log;		// outer window
 
   void Build(int side);
-  virtual void GetFieldValue(const G4double Point[4], G4double* Bfield) const;
-  virtual G4bool DoesFieldChangeEnergy() const { return dE0 != 0; };
-  void ConstructField();
-  void SetPotential(G4double Vanode);
 
-
-  G4MagneticField* fMyBField;		// magnetic field pointer coming from global field in DetectorConstruction.
   G4RotationMatrix* fMyRotation;	// rotation from global frame to local coordinates
   G4ThreeVector vMyTranslation;		// translation from global coordinates to center of anode plane
   G4double dE0;				// field scaling constant. Needed here to get passed to MWPCField later
 
 protected:
   G4double dMWPCContainerHalf_Z;	// half width of wirechamber
-
-  double dd;	// spacing between anode wires
-  double dL;	// spacing between planes
-  double dr;	// anode wire radius
-
 
 };
 

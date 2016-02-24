@@ -1,16 +1,8 @@
 #include "WirechamberConstruction.hh"
 
-#include <math.h>
-
-#include <G4PVReplica.hh>
-#include <G4FieldManager.hh>
-#include <G4ChordFinder.hh>
-#include <G4EqMagElectricField.hh>
-#include <G4ClassicalRK4.hh>
-
 WirechamberConstruction::WirechamberConstruction()
 : dWindowThick(6*um), dMWPCEntranceR(7.0*cm), dMWPCExitR(7.5*cm),
-mMWPCActiveRegionGas(WCPentane), dEntranceToCathodes(5.0*mm), dExitToCathodes(5.0*mm), dE0(0), fMyBField(NULL)
+mMWPCActiveRegionGas(WCPentane), dEntranceToCathodes(5.0*mm), dExitToCathodes(5.0*mm), dE0(0)
 {
   // can again do stuff in this constructor. But class members already set.
 }
@@ -24,19 +16,17 @@ void WirechamberConstruction::Build(int side)
   dMWPCContainerHalf_Z = 0.5*(dEntranceToCathodes + dExitToCathodes + 2*cm);
   G4double gasVolumeWidth = 8.0*inch;	// MWPC gas box width
 
-  dd = ActiveRegion.dWireSpacing;
-  dL = ActiveRegion.dPlaneSpacing;
-  dr = ActiveRegion.dAnodeRadius;
-
   //----- container volume for all MWPC
   G4Box* containerBox = new G4Box("mwpc_container_box", gasVolumeWidth/2., gasVolumeWidth/2., dMWPCContainerHalf_Z);
   container_log = new G4LogicalVolume(containerBox, mMWPCActiveRegionGas, Append(side, "mwpc_container_log_"));
   container_log -> SetVisAttributes(G4VisAttributes::Invisible);
 
+  mwpcOverall_shape = containerBox;	// NEW LINE
+
   // MWPC active gas volume placement with wireplane, relative to MWPC container volume
   vMyTranslation = G4ThreeVector(0, 0, (dEntranceToCathodes - dExitToCathodes)/2.);
   // Note: these lines place WirechamberActiveRegion inside mwpc.
-  new G4PVPlacement(NULL, vMyTranslation, ActiveRegion.gas_log, Append(side, "mwpc_activeReg_phys_"), container_log, false, 0);
+  new G4PVPlacement(NULL, vMyTranslation, ActiveRegion.gas_log, Append(side, "mwpc_activeReg_phys_"), container_log, false, 0, true);
 
   //----- Kevlar strings and Mylar windows
   // rectangular cross section strings with equal volume to norminal 140um cylinders
@@ -84,71 +74,5 @@ void WirechamberConstruction::Build(int side)
       winIn_log, Append(side, "winIn_phys_"), container_log, false, 0);
   new G4PVPlacement(NULL, G4ThreeVector(0,0, dMWPCContainerHalf_Z - dWindowThick/2.),
       winOut_log, Append(side, "winOut_phys_"), container_log, false, 0);
-
 }
 
-void WirechamberConstruction::GetFieldValue(const G4double Point[4], G4double* Bfield) const
-{
-  // set magnetic field
-  if(fMyBField) fMyBField->GetFieldValue(Point,Bfield);
-  else Bfield[0]=Bfield[1]=Bfield[2]=0;
-
-  if(!dE0) { Bfield[3]=Bfield[4]=Bfield[5]=0; return; }
-
-  // local position
-  G4ThreeVector localPos = G4ThreeVector(Point[0],Point[1],Point[2])-vMyTranslation;
-  if(fMyRotation) localPos = (*fMyRotation)(localPos);
-
-  // electric field components
-  G4ThreeVector E(0,0,0);
-  double l = localPos[2];
-  if(fabs(l) < dL)
-  {
-    double a = localPos[0]/dd;
-    a = (a-floor(a)-0.5)*dd;
-    if(a*a+l*l > dr*dr)
-    {
-      double denom = cosh(2*M_PI*l/dd)-cos(2*M_PI*a/dd);
-      E[2] = dE0*sinh(2*M_PI*l/dd)/denom;
-      E[0] = dE0*sin(2*M_PI*a/dd)/denom;
-    }
-  }
-
-  // return to global coordinates
-  if(fMyRotation) E = fMyRotation->inverse()(E);
-  Bfield[3] = E[0];
-  Bfield[4] = E[1];
-  Bfield[5] = E[2];
-}
-
-void WirechamberConstruction::SetPotential(G4double Vanode)
-{
-  dE0 = M_PI*Vanode/dd/log(sinh(M_PI*dL/dd)/sinh(M_PI*dr/dd));
-  G4cout << "Wirechamber voltage set to " << Vanode/volt <<" V => dE0 = " << dE0/(volt/cm) << " V/cm" << G4endl;
-
-}
-
-void WirechamberConstruction::ConstructField()
-{
-  G4cout << "Setting up wirechamber electromagnetic field...";
-  // local field manager
-  G4FieldManager* localFieldMgr = new G4FieldManager();
-  localFieldMgr -> SetDetectorField(fMyBField);
-
-  // equation of motion, stepper for field
-  G4EqMagElectricField* pEquation = new G4EqMagElectricField(fMyBField);
-  G4ClassicalRK4* pStepper = new G4ClassicalRK4(pEquation,8);
-  G4MagInt_Driver* pIntgrDriver = new G4MagInt_Driver(0.01*um,pStepper,pStepper->GetNumberOfVariables());
-  G4ChordFinder* pChordFinder = new G4ChordFinder(pIntgrDriver);
-  localFieldMgr -> SetChordFinder(pChordFinder);
-
-  // accuracy settings
-  localFieldMgr -> GetChordFinder()->SetDeltaChord(10*um);
-  localFieldMgr -> SetMinimumEpsilonStep(1e-6);
-  localFieldMgr -> SetMaximumEpsilonStep(1e-5);
-  localFieldMgr -> SetDeltaOneStep(0.1*um);
-
-  // apply field manager to wirechamber and all daughter volumes
-  container_log -> SetFieldManager(localFieldMgr,true);
-  G4cout << " Done." << G4endl;
-}
