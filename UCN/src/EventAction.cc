@@ -68,10 +68,14 @@ EventAction::EventAction()
     fSDNames[i] = "initialized_in_EventAction_to_nothing";
   }
 
+  G4cout << "Event action constructor end" << G4endl;
+
   fScintEast_index = -1;
   fScintWest_index = -1;
   fActiveWireVolEast_index = -1;
   fActiveWireVolWest_index = -1;
+
+  G4cout << "official end of event action constructor" << G4endl;
 }
 
 
@@ -80,6 +84,8 @@ EventAction::~EventAction()
 
 void EventAction::BeginOfEventAction(const G4Event* evt)
 {
+  G4cout << "beginng event action " << G4endl;
+
   fTrapped = false;
   fStartTime = 0;
 

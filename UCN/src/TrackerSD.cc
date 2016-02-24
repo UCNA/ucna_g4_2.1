@@ -26,6 +26,8 @@ TrackerSD::TrackerSD(G4String sdname, G4String hcname):
   // which is the name of the hits collection defined in teh sensitive detector object.
   // In the constructor, the name of the hits collection must be defined.
   collectionName.insert(hcname);
+
+  G4cout << "TrackerSD constructor end" << G4endl;
 }
 
 // quenching calculation... see Junhua's thesis
@@ -41,6 +43,8 @@ double TrackerSD::QuenchFactor(double E) const
 // and set it to the G4HCofThisEvent object
 void TrackerSD::Initialize(G4HCofThisEvent* hce)
 {
+  G4cout << "Begin the initialize method of trackersd" << G4endl;
+
   // make a new hits collection and register it for this event
   fHitsCollection = new TrackerHitsCollection(SensitiveDetectorName,collectionName[0]);
   G4int hcID = G4SDManager::GetSDMpointer()->GetCollectionID(fHitsCollection);
@@ -161,8 +165,8 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,G4TouchableHistory*)
     if(fTrackOriginEnergy.find(sTrack) != fTrackOriginEnergy.end())
     {
       // Add code that increments a kill counter or kills the entire event here.
-      G4cout << "Apparently we have a duplicate secondary. \n"
-             << "This event should be invalid. Make of a note of it." << G4endl;
+//      G4cout << "Apparently we have a duplicate secondary. \n"
+//             << "This event should be invalid. Make of a note of it." << G4endl;
     }
     fTrackOriginEnergy.insert(pair<const G4Track*, double>(sTrack, eOrig));
   }

@@ -17,6 +17,9 @@
 #include <G4ProcessManager.hh>
 
 PhysList495::PhysList495() : G4VModularPhysicsList(), emPhysicsList(NULL) {
+
+G4cout << "Do we make it to physics list constructor?" << G4endl;
+
 	G4LossTableManager::Instance();
 	defaultCutValue = 1.*um;
 	cutForGamma     = defaultCutValue;

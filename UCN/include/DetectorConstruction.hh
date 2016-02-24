@@ -6,6 +6,7 @@
 #include "SourceHolderConstruction.hh"
 #include "DecayTrapConstruction.hh"
 #include "ScintillatorConstruction.hh"
+#include "WirechamberConstruction.hh"
 
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
@@ -45,11 +46,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
     ScintillatorConstruction Scint[2];
     G4VPhysicalVolume* scint_phys[2];
 
-/*    G4LogicalVolume* scint_container_log[2];
-    G4LogicalVolume* scint_deadLayer_log[2];
-    G4LogicalVolume* scint_scintillator_log[2];
-    G4LogicalVolume* scint_lightGuide_log[2];
-    G4LogicalVolume* scint_backing_log[2]; */
+    WirechamberConstruction Wirechamber[2];
+    G4VPhysicalVolume* mwpc_phys[2];
+
+
     G4LogicalVolume* wireVol_gas_log[2];
     G4LogicalVolume* wireVol_cathSeg_log[2];
     G4LogicalVolume* wireVol_anodeSeg_log[2];
@@ -75,11 +75,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
     G4String fHCNamesArray[fNbSDs];
 
   protected:
-/*    G4VPhysicalVolume* scint_deadLayer_phys[2];
-    G4VPhysicalVolume* scint_scintillator_phys[2];
-    G4VPhysicalVolume* scint_lightGuide_phys[2];
-    G4VPhysicalVolume* scint_backing_phys[2];
-    G4VPhysicalVolume* scint_container_phys[2]; */
     G4VPhysicalVolume* mwpc_container_phys[2];
     G4VPhysicalVolume* frame_entranceFront_phys[2];
     G4VPhysicalVolume* frame_entranceMid_phys[2];
