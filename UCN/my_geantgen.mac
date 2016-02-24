@@ -1,0 +1,11 @@
+###### Pre-initialization commands
+#
+# Supply the full path to input ptcl file, and names of the output files
+/particleGun/inputName /home/xuansun/Documents/Caltech/UCNA_Sim/ucna_g4Sim_XSun_2.1/ucna_g4_2.1/UCN/EventGenTools/G4Sim_Ptcl_Input_Files/big_initPtclInfo.txt
+/particleGun/outputName UCNASimOutput.txt	# Note: these two output names (and paths)
+/event/outputName UCNASimOutput.txt		# need to be identical
+#
+###### Run initialization and start
+#
+/run/initialize
+/run/beamOn 300000

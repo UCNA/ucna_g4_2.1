@@ -10,7 +10,12 @@
 
 #include <time.h>
 
-class EventAction : public G4UserEventAction
+#include <G4UImessenger.hh>
+#include <G4UIdirectory.hh>
+#include <G4UIcommand.hh>
+#include <G4UIcmdWithAString.hh>
+
+class EventAction : public G4UserEventAction, G4UImessenger
 {
   public:
     EventAction();
@@ -18,6 +23,8 @@ class EventAction : public G4UserEventAction
 
     virtual void BeginOfEventAction(const G4Event* evt);
     virtual void EndOfEventAction(const G4Event* evt);
+
+    virtual void SetNewValue(G4UIcommand* command, G4String newValue);
 
     void SetTrappedTrue() { fTrapped = true; };
 
@@ -38,6 +45,14 @@ class EventAction : public G4UserEventAction
     int fScintWest_index;
     int fActiveWireVolEast_index;
     int fActiveWireVolWest_index;
+
+    // UI variables. Only needed for output file name (and/or path)
+    G4UIdirectory* uiEventDir;
+
+    G4UIcmdWithAString* uiOutputFileCmd;
+    G4String sOutputFileName;
+
+
 };
 
 #endif

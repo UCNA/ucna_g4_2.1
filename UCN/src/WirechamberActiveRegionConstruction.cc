@@ -3,7 +3,7 @@
 #include <iostream>
 
 WirechamberActiveRegionConstruction::WirechamberActiveRegionConstruction()
-: dAnodeRadius(5*um), dCathodeRadius(25*um), dPlatingThick(0.2*um), dWireSpacing(2*mm),
+: dAnodeRadius(5*um), dCathodeRadius(25*um), dPlatingThick(0.2*um), dWireSpacing(2.54*mm),
 iNbOfWires(64), dPlaneSpacing(1*cm)
 {
   // here is space to set initial values of class members as well.

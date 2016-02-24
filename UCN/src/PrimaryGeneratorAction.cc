@@ -17,21 +17,38 @@
 #include <string>
 using   namespace       std;
 
-#define	OUTPUT_FILE	"UCNASimOutput.txt"
-#define	INPUT_PTCL_FILE	"big_initPtclInfo.txt"
+//#define	INPUT_PTCL_FILE	"big_initPtclInfo.txt"
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
-: G4VUserPrimaryGeneratorAction(),
+: G4VUserPrimaryGeneratorAction(), G4UImessenger(),
   fParticleGun(0),
   fMyDetector(myDC),
 //  fSourceRadius(3.*mm),	// this is default set. If you aren't using DiskRandom, don't care.
   fSourceRadius(0),
-  fPosOffset(G4ThreeVector(0,0,0))	// if it's not a source, then set to 0
+  fPosOffset(G4ThreeVector(0,0,0)),	// if it's not a source, then set to 0
+  bIsLoaded(false)
 {
+  //----- Below is messenger class
+
+  uiGenDir = new G4UIdirectory("/particleGun/");
+  uiGenDir -> SetGuidance("/primaryGeneratorAction control");
+
+  uiInputFileCmd = new G4UIcmdWithAString("/particleGun/inputName", this);
+  uiInputFileCmd -> SetGuidance("Set the input file name of the primaries.");
+  uiInputFileCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+  sInputFileName = "none.txt";
+
+  uiOutputFileCmd = new G4UIcmdWithAString("/particleGun/outputName", this);
+  uiOutputFileCmd -> SetGuidance("Set the output file name of the primaries.");
+  uiOutputFileCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+  sOutputFileName = "none.txt";
+
+  //----- Above is messenger class
+
   G4int nPtcls = 1;
   fParticleGun = new G4ParticleGun(nPtcls);
 
-  G4String base = getenv("UCNA_BASE");
+/*  G4String base = getenv("UCNA_BASE");
   G4String path = base + "/UCN/EventGenTools/G4Sim_Ptcl_Input_Files/";
   G4String file = path + INPUT_PTCL_FILE;
 
@@ -39,18 +56,39 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
   G4cout << "Fetching initial particles info from file name: " << file << G4endl;
 
   LoadFile(file);
-  // At the end of constructor, GEANT4 default calls GeneratePrimaries method
+*/  // At the end of constructor, GEANT4 default calls GeneratePrimaries method
 }
-
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
   delete fParticleGun;
 }
 
+void PrimaryGeneratorAction::SetNewValue(G4UIcommand* command, G4String newValue)
+{
+  if(command == uiInputFileCmd)
+  {
+    sInputFileName = G4String(newValue);
+    G4cout << "Setting input primary particles file to " << sInputFileName << G4endl;
+  }
+  else if(command == uiOutputFileCmd)
+  {
+    sOutputFileName = G4String(newValue);
+    G4cout << "Setting output primary particles information file to " << sOutputFileName << G4endl;
+  }
+  else
+    G4cout << "COMMAND DOES NOT MATCH PRIMARY GENERATOR ACTION OPTIONS." << G4endl;
+}
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
+  if(bIsLoaded == false)
+  {
+    G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
+    LoadFile(sInputFileName);
+  }
+
+
   // use GEANT4 event id to track which part of fEvtsArray we will use for generated event
   int nID = anEvent -> GetEventID();
 
@@ -126,6 +164,8 @@ void PrimaryGeneratorAction::LoadFile(G4String fileName)
     }
   }
 
+  // Set this class member to true so that we don't reload the input file every time
+  bIsLoaded = true;
 }
 
 void PrimaryGeneratorAction::DiskRandom(G4double radius, G4double& x, G4double& y)
@@ -153,7 +193,7 @@ void PrimaryGeneratorAction::DisplayGunStatus()
 void PrimaryGeneratorAction::SavePrimPtclInfo(int index)
 {
   ofstream outfile;     // output initial particle information into same file as final sim output
-  outfile.open(OUTPUT_FILE, ios::app);
+  outfile.open(sOutputFileName, ios::app);
   outfile << fEvtsArray[index].event_gen_id << "\t"
 	<< fEvtsArray[index].event_speciesFlag << "\t"
 	<< fEvtsArray[index].event_energy << "\t"

@@ -59,6 +59,16 @@ struct EventInfo
 EventAction::EventAction()
 : G4UserEventAction(), fStartTime(0)
 {
+  //----- Below is messenger class
+  uiEventDir = new G4UIdirectory("/event/");
+  uiEventDir -> SetGuidance("/event action");
+
+  uiOutputFileCmd = new G4UIcmdWithAString("/event/outputName", this);
+  uiOutputFileCmd -> SetGuidance("Set the final event print out file name");
+  uiOutputFileCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+  sOutputFileName = "none.txt";
+  //----- Above is messenger class
+
   fMyDetectorConstruction = static_cast<const DetectorConstruction*>(G4RunManager::GetRunManager()->GetUserDetectorConstruction());
   // initialize all values to -1 since that doesn't correspond to any actual SD
 
@@ -74,9 +84,19 @@ EventAction::EventAction()
   fActiveWireVolWest_index = -1;
 }
 
-
 EventAction::~EventAction()
 {}
+
+void EventAction::SetNewValue(G4UIcommand* command, G4String newValue)
+{
+  if(command == uiOutputFileCmd)
+  {
+    sOutputFileName = G4String(newValue);
+    G4cout << "Setting event output file name to " << sOutputFileName << G4endl;
+  }
+  else
+    G4cout << "COMMAND DOES NOT MATCH ANY EVENT ACTION OPTIONS." << G4endl;
+}
 
 void EventAction::BeginOfEventAction(const G4Event* evt)
 {

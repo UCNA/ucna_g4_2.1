@@ -13,6 +13,11 @@
 #include <G4Event.hh>
 #include <G4VUserEventInformation.hh>
 
+#include <G4UImessenger.hh>
+#include <G4UIdirectory.hh>
+#include <G4UIcommand.hh>
+#include <G4UIcmdWithAString.hh>
+
 
 class G4ParticleGun;
 class G4Event;
@@ -44,7 +49,7 @@ struct event
   G4double event_weight;	// unitless
 };
 
-class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
+class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImessenger
 {
   public:
     PrimaryGeneratorAction(DetectorConstruction*);
@@ -56,10 +61,14 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     // method to access particle gun
     const G4ParticleGun* GetParticleGun() const { return fParticleGun; }
 
+    // UI interface
+    virtual void SetNewValue(G4UIcommand* command, G4String newValue);
+
   private:
     G4ParticleGun*  fParticleGun; 	// pointer a to G4 gun class
     DetectorConstruction* fMyDetector;	// pointer to the detector geometry class
 
+    bool bIsLoaded;			// check if we've already loaded the input ptcl file
     G4double fSourceRadius;		// spread radius for source droplets
     G4ThreeVector fPosOffset;		// base positioning offset
     event fEvtsArray[1000000];		// size has to be number of lines in input file
@@ -69,6 +78,15 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     void DisplayGunStatus();
     void SavePrimPtclInfo(int index);
     void Set_113SnSource();
+
+    // UI command variables for messenger class input/output files
+    G4UIdirectory* uiGenDir;	// UI directory for primaryGeneratorAction related commands
+
+    G4UIcmdWithAString* uiInputFileCmd;	// which input file name to take
+    G4String sInputFileName;
+
+    G4UIcmdWithAString* uiOutputFileCmd;	// which output file name to take
+    G4String sOutputFileName;
 
 };
 
