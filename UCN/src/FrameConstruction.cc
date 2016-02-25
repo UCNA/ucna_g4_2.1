@@ -13,10 +13,6 @@ void FrameConstruction::Build(int side, G4Box* mwpc_shape, G4Tubs* scint_shape,
 				G4double mwpc_width, G4double scint_width, G4double scint_facePos,
 				G4double mwpc_exitR, G4double mwpc_entranceR)
 {
-  // create component objects that will be placed inside the detector package
-//  Scint.Build(side);
-//  Wirechamber.Build(side);
-
   // make aluminum entrance collimator to detector package
   G4double entranceSectionLength = dMWPCEntranceDepth + dFrontWinFrameThick;
   G4Tubs* mwpcEntranceTube = new G4Tubs("mwpc_entrance_tube", 0., dDetPackageRadius, 0.5*entranceSectionLength, 0., 2*M_PI);

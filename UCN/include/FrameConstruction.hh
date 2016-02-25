@@ -19,9 +19,6 @@ public:
   G4double dFrontWinFrameThick;	// mwpc front window frame thickness
   G4double dBackWinFrameThick;	// mwpc exit window frame thickness
 
-//  ScintillatorConstruction Scint;	// scintillator assembly
-//  WirechamberConstruction Wirechamber;	// wirechamber assembly
-
   G4LogicalVolume* container_log;	// overall positioning container to hold the package
   G4LogicalVolume* mwpcEntrance_log;	// entrance port container
   G4LogicalVolume* entranceFront_log;	// entrance port front plate
@@ -41,9 +38,6 @@ public:
 		G4double mwpc_exitR, G4double mwpc_entranceR);
 
 protected:
-//  G4VPhysicalVolume* scint_phys;
-//  G4VPhysicalVolume* mwpc_phys;
-
   G4VPhysicalVolume* mwpcEntrance_phys;
   G4VPhysicalVolume* entranceFront_phys;
   G4VPhysicalVolume* entranceMid_phys;
