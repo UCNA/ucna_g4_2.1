@@ -21,7 +21,7 @@
 #include <cmath>
 using   namespace       std;
 
-#define	OUTPUT_FILE	"UCNASimOutput.txt"
+//#define	OUTPUT_FILE	"UCNASimOutput.txt"
 
 struct SingleSDInfo
 {
@@ -239,7 +239,7 @@ void EventAction::EndOfEventAction(const G4Event* evt)
 
   // print out of class member variables due to stepping action
   ofstream outfile;
-  outfile.open(OUTPUT_FILE, ios::app);
+  outfile.open(sOutputFileName, ios::app);
 
   outfile << event.trapped << "\t"
 	  << event.compTime/s << "\t";

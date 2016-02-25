@@ -46,12 +46,109 @@ DetectorConstruction::DetectorConstruction()
   fSourceFoilThick(9.4*um),
   fCrinkleAngle(0*rad)
 {
+  // initialize some useful private class variables
+  fStorageIndex = 0;    // this loops over our TrackerHit names storage array
+  fCrinkleAngle = 0;
+
+  // Here in the constructor we will create everything related to a "messenger" class
+  uiDetectorDir = new G4UIdirectory("/detector/");
+  uiDetectorDir -> SetGuidance("/detector control");
+
+  uiDetectorGeometryCmd = new G4UIcmdWithAString("/detector/geometry",this);
+  uiDetectorGeometryCmd -> SetGuidance("Set the geometry of the detector");
+  uiDetectorGeometryCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+  sGeometry = "C";      // this sets a default
+
+  uiDetOffsetCmd = new G4UIcmdWith3VectorAndUnit("/detector/offset",this);
+  uiDetOffsetCmd -> SetGuidance("antisymmetric offset of detector packages from central axis");
+  uiDetOffsetCmd -> SetDefaultValue(G4ThreeVector());
+  uiDetOffsetCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+  vDetOffset = G4ThreeVector();
+
+  uiDetRotCmd = new G4UIcmdWithADouble("/detector/rotation",this);
+  uiDetRotCmd -> SetGuidance("Antisymmetric rotation of detector packages around z axis");
+  uiDetRotCmd -> SetDefaultValue(0.);
+  uiDetRotCmd -> AvailableForStates(G4State_PreInit);
+  fDetRot = 0.;
+
+  uiVacuumLevelCmd = new G4UIcmdWithADoubleAndUnit("/detector/vacuum",this);
+  uiVacuumLevelCmd -> SetGuidance("Set SCS vacuum pressure");
+  fVacuumPressure = 0;
+
+  uiSourceHolderPosCmd = new G4UIcmdWith3VectorAndUnit("/detector/sourceholderpos",this);
+  uiSourceHolderPosCmd -> SetGuidance("position of the source holder");
+  uiSourceHolderPosCmd -> SetDefaultValue(G4ThreeVector());
+  uiSourceHolderPosCmd -> AvailableForStates(G4State_PreInit);
+  vSourceHolderPos = G4ThreeVector(0,0,0);      // we explicitly set all class members...
+
+  uiUseFoilCmd = new G4UIcmdWithABool("/detector/infoil",this);
+  uiUseFoilCmd -> SetGuidance("Set true to build In source foil instead of usual sealed sources");
+  uiUseFoilCmd -> SetDefaultValue(false);
+  bUseFoil = false;                             // ...since some of these SetDefaultVolume...
+
+  uiSourceFoilThickCmd = new G4UIcmdWithADoubleAndUnit("/detector/sourcefoilthick",this);
+  uiSourceFoilThickCmd -> SetGuidance("Set source foil full thickness");
+  fSourceFoilThick = 7.2*um;
+  uiSourceFoilThickCmd -> SetDefaultValue(fSourceFoilThick);
+  uiSourceFoilThickCmd -> AvailableForStates(G4State_PreInit);
+
+  uiScintStepLimitCmd = new G4UIcmdWithADoubleAndUnit("/detector/scintstepsize",this);
+  uiScintStepLimitCmd -> SetGuidance("step size limit in scintillator, windows");
+  uiScintStepLimitCmd -> SetDefaultValue(1.0*mm);
+  fScintStepLimit = 1.0*mm;                     // ...doesn't seem to work (see above comments set)
+
+  experimentalHall_log = NULL;
+  experimentalHall_phys = NULL;
 
 }
 
-
 DetectorConstruction::~DetectorConstruction()
 { }
+
+void DetectorConstruction::SetNewValue(G4UIcommand * command, G4String newValue)
+{
+  if (command == uiDetectorGeometryCmd)
+  {
+    sGeometry = G4String(newValue);
+  }
+  else if (command == uiDetOffsetCmd)
+  {
+    vDetOffset = uiDetOffsetCmd->GetNew3VectorValue(newValue);
+    G4cout << "Setting detector offsets to " << vDetOffset/mm << " mm" << G4endl;
+  }
+  else if (command == uiDetRotCmd)
+  {
+    fDetRot = uiDetRotCmd->GetNewDoubleValue(newValue);
+    G4cout << "Setting detector rotation to " << fDetRot << " radians" << G4endl;
+  }
+  else if (command == uiSourceHolderPosCmd)
+  {
+    vSourceHolderPos = uiSourceHolderPosCmd->GetNew3VectorValue(newValue);
+    G4cout<<"setting the source at "<<vSourceHolderPos/mm << " mm" << G4endl;
+  }
+  else if (command == uiVacuumLevelCmd)
+  {
+    fVacuumPressure = uiVacuumLevelCmd->GetNewDoubleValue(newValue);
+  }
+  else if (command == uiUseFoilCmd)
+  {
+    bUseFoil = uiUseFoilCmd->GetNewBoolValue(newValue);
+    G4cout << "Setting In source foil construction to " << bUseFoil << G4endl;
+  }
+  else if(command == uiSourceFoilThickCmd)
+  {
+    fSourceFoilThick = uiSourceFoilThickCmd->GetNewDoubleValue(newValue);
+  }
+  else if (command == uiScintStepLimitCmd)
+  {
+    fScintStepLimit = uiScintStepLimitCmd->GetNewDoubleValue(newValue);
+    G4cout << "Setting step limit in solids to " << fScintStepLimit/mm << "mm" << G4endl;
+  }
+  else
+  {
+    G4cout << "Unknown command:" << command->GetCommandName() << " passed to DetectorConstruction::SetNewValue" << G4endl;
+  }
+}
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {

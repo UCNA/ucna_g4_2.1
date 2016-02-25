@@ -12,14 +12,19 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
-#include <G4Material.hh>		// stole from Michael Mendenhall's code.
-#include <G4Element.hh>
-#include <G4SystemOfUnits.hh>
-#include <G4ThreeVector.hh>
-
 #include <G4ElectroMagneticField.hh>	// Taken from WirechamberConstruction.
 #include <G4MagneticField.hh>
 #include <G4RotationMatrix.hh>
+
+#include <G4UImessenger.hh>             // Taken from DetectorConstruction.hh M.M's
+#include <G4UIdirectory.hh>
+#include <G4UIcommand.hh>
+#include <G4UIcmdWithADoubleAndUnit.hh>
+#include <G4UIcmdWithADouble.hh>
+#include <G4UIcmdWith3VectorAndUnit.hh>
+#include <G4UIcmdWithABool.hh>
+#include <G4UIcmdWithAString.hh>
+
 
 #include <string>
 #include <sstream>
@@ -29,12 +34,14 @@ const int fNbSDs = 4;
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 
-class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
+class DetectorConstruction : public G4VUserDetectorConstruction, G4UImessenger, MaterialUser
 {
   public:
     DetectorConstruction();		// Constructor/destructors
     virtual ~DetectorConstruction();
     virtual G4VPhysicalVolume* Construct();
+
+    virtual void SetNewValue(G4UIcommand * command,G4String newValue);  // UI communicator
 
     G4LogicalVolume* experimentalHall_log;
     G4VPhysicalVolume* experimentalHall_phys;
@@ -85,13 +92,35 @@ class DetectorConstruction : public G4VUserDetectorConstruction, MaterialUser
     TrackerSD* SD_decayTrap_innerMonitors[2];
     TrackerSD* SD_world;
 
+    // User Interface commands from .mac files
+    G4UIdirectory* uiDetectorDir;       // UI directory for detector-related commands
 
+    G4UIcmdWithAString* uiDetectorGeometryCmd;  // which detector geometry to construct
+    G4String sGeometry;
+
+    G4UIcmdWith3VectorAndUnit* uiSourceHolderPosCmd;    // source holder position
+    G4ThreeVector vSourceHolderPos;
+
+    G4UIcmdWith3VectorAndUnit* uiDetOffsetCmd;  // symmetrical detector offset from center origin
+    G4ThreeVector vDetOffset;
+
+    G4UIcmdWithADouble* uiDetRotCmd;            // symmetrical detector rotation angle around Z axis (radians, hence no units)
+    float fDetRot;
+
+    G4UIcmdWithABool* uiUseFoilCmd;             // construction of Indium 10um Al source foil
+    bool bUseFoil;
+
+    G4UIcmdWithADoubleAndUnit* uiVacuumLevelCmd;        // SCS bore vacuum
+    G4float fVacuumPressure;
+
+    G4UIcmdWithADoubleAndUnit* uiScintStepLimitCmd;     // step size limiter in scintillator
+    G4float fScintStepLimit;
+
+    G4UIcmdWithADoubleAndUnit* uiSourceFoilThickCmd;    // source foil full thickness
     G4float fSourceFoilThick;
-
 
     // some of my own tools to help with DetectorConstruction
     int fStorageIndex;
-    G4double fScintStepLimit;
     G4float fCrinkleAngle;
 };
 
