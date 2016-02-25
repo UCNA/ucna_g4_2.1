@@ -40,11 +40,7 @@
 
 
 DetectorConstruction::DetectorConstruction()
-: G4VUserDetectorConstruction(),
-  fScintStepLimit(1.0*mm),	// note: fScintStepLimit initialized here
-  fStorageIndex(0),	// this variable loops over our TrackerHit names storage index
-  fSourceFoilThick(9.4*um),
-  fCrinkleAngle(0*rad)
+: G4VUserDetectorConstruction()
 {
   // initialize some useful private class variables
   fStorageIndex = 0;    // this loops over our TrackerHit names storage array
@@ -88,7 +84,8 @@ DetectorConstruction::DetectorConstruction()
 
   uiSourceFoilThickCmd = new G4UIcmdWithADoubleAndUnit("/detector/sourcefoilthick",this);
   uiSourceFoilThickCmd -> SetGuidance("Set source foil full thickness");
-  fSourceFoilThick = 7.2*um;
+//  fSourceFoilThick = 7.2*um;
+  fSourceFoilThick = 9.4*um;
   uiSourceFoilThickCmd -> SetDefaultValue(fSourceFoilThick);
   uiSourceFoilThickCmd -> AvailableForStates(G4State_PreInit);
 
