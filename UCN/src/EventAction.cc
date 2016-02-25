@@ -21,8 +21,6 @@
 #include <cmath>
 using   namespace       std;
 
-//#define	OUTPUT_FILE	"UCNASimOutput.txt"
-
 struct SingleSDInfo
 {
   // these initalized variable values are needed or else you'll run into same errors as in TrackerHit

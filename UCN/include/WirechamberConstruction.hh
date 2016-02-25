@@ -37,7 +37,7 @@ public:
   void Build(int side);
 
   G4RotationMatrix* fMyRotation;	// rotation from global frame to local coordinates
-  G4ThreeVector vMyTranslation;		// translation from global coordinates to center of anode plane
+  G4ThreeVector vMyTranslation;		// translation from global coordinates to center of anode plane (active region)
   G4double dE0;				// field scaling constant. Needed here to get passed to MWPCField later
 
 protected:

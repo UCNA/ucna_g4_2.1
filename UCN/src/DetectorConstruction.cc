@@ -21,7 +21,7 @@
 
 #include <G4EqMagElectricField.hh>
 #include <G4ClassicalRK4.hh>
-#include <G4MagneticField.hh>		// Bottom half of detector construction
+#include <G4MagneticField.hh>		// Bottom half of Mendenhall detector construction
 #include <G4FieldManager.hh>
 #include <G4ChordFinder.hh>
 #include <G4PropagatorInField.hh>
@@ -29,8 +29,8 @@
 #include <G4UserLimits.hh>
 #include <G4PVParameterised.hh>
 
-#include "G4MagIntegratorStepper.hh"
-#include "G4Mag_UsualEqRhs.hh"
+#include "G4MagIntegratorStepper.hh"	// needed for GlobalField and MWPCField
+#include "G4Mag_UsualEqRhs.hh"		// taken from a default g4 example
 #include "G4SimpleHeum.hh"
 #include "G4HelixHeum.hh"
 #include "G4HelixImplicitEuler.hh"
@@ -149,7 +149,7 @@ void DetectorConstruction::SetNewValue(G4UIcommand * command, G4String newValue)
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-  SetVacuumPressure(0);	// this is the set vacuum pressure that was warned about in DefineMaterials()
+  SetVacuumPressure(fVacuumPressure);	// this is the set vacuum pressure that was warned about in DefineMaterials()
 
   // user step limits
   G4UserLimits* UserCoarseLimits = new G4UserLimits();
@@ -173,14 +173,49 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // fSourceFoilThick set to 9.4*um. In the geantgen_#.mac it is 9.5*um.
   // So ignore the Messenger default which is 7.2*um
   Source.dSourceWindowThickness = fSourceFoilThick/2.;	// should be same as source_windowThick = 4.7*um
+  if(bUseFoil)
+  {
+    G4cout << "Flag set to create Indium source foil." << G4endl;
+        // note this has not been implemented yet
+  }
   Source.Build();
   // And we don't place the source holder object until later.
 //  source_phys = new G4PVPlacement(NULL, source_holderPos, source_container_log, "source_container_phys",
 //                               experimentalHall_log, false, 0, true);
 
+  // Set the geometry dependent settings of our detector
+  G4cout << "Using geometry '" << sGeometry << "' ..." << G4endl;
+  // Note Michael Brown sets these outside any of the flags.
+  Trap.dCoatingThick = 0.150*um;
+  Trap.dWindowThick = 0.500*um;
+  if(sGeometry == "C")
+  {
+    // "default" thin-windows configuration. This is Michael Mendenhall's default!
+  }
+  else if(sGeometry == "thinFoil")
+  {
+    Trap.dWindowThick = 0.180*um;
+    Trap.dCoatingThick = 0.150*um;
+  }
+  else if(sGeometry == "2011/2012")
+  {     // Michael Brown's changes that form the 2011/2012 detector geometry
+    Trap.dWindowThick = 0.500*um;
+    Trap.mDecayTrapWindowMat = Mylar;
+    Trap.dInnerRadiusOfCollimator = 2.3*inch;
+    Trap.dCollimatorThick = 0.7*inch;
+    for(int t = 0; t <= 1; t++)
+    {
+      Wirechamber[t].ActiveRegion.dAnodeRadius = 5*um;
+      Wirechamber[t].ActiveRegion.dCathodeRadius = 39.1*um;
+    }
+  }
+  else
+    G4cout << "WARNING: PASSED GEOMETRY FLAG DOESN'T MATCH ANY PRE-PROGRAMMED GEOMETRY!" << G4endl;
+
+
 
   //----- Decay Trap object (length 3m, main tube)
-  Trap.dWindowThick = 0.50*um;	// M.Brown sets these before we enter geometry choice
+/*  Trap.dWindowThick = 0.50*um;	// M.Brown sets these before we enter geometry choice
   Trap.dCoatingThick = 0.150*um;
 
   // 2011/2012 geometry settings are:
@@ -191,131 +226,59 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Stuff pertaining to wirechamber volume cathode/anode radius
 //  G4double wireVol_anodeRadius = 5*um;
 //  G4double wireVol_cathodeRadius = 39.1*um;
+*/
 
   // make the DecayTrapConstruction object.
   Trap.Build(experimentalHall_log, fCrinkleAngle);
 
-  //----- Attempt to place everything.
-  G4RotationMatrix* EastSideRot = new G4RotationMatrix();
-  EastSideRot -> rotateY(M_PI*rad);
-
-/*    G4ThreeVector sideTransFrame = G4ThreeVector(0., 0., 2.2*m);
-    G4ThreeVector sideTransScint = sideTransFrame + G4ThreeVector(0., 0., -Scint[0].GetScintFacePos());
-
-    G4double frame_backWinFrameThick = 0.5*inch;  // originally placed further down but needed here
-    G4double mwpc_containerHalf_Z = (Wirechamber[0].GetWidth())/2.;       // this should be same for 0 or 1
-    G4double mwpc_PosZ = -mwpc_containerHalf_Z - frame_backWinFrameThick
-                - (Scint[0].GetWidth()/2. + Scint[0].GetScintFacePos());
-    G4ThreeVector sideTransMWPC = sideTransFrame + G4ThreeVector(0, 0, mwpc_PosZ);
-*/
+  // place the scint and mwpc and detector frames in a loop
   for(int i = 0; i <= 1; i++)
   {
-    G4RotationMatrix* sideRot = new G4RotationMatrix();
-    if(i == 0) sideRot -> rotateY(M_PI*rad);
-
-    Wirechamber[i].ActiveRegion.dAnodeRadius = 5*um;    // Michael Brown's pre-sets for 2011/2012
-    Wirechamber[i].ActiveRegion.dCathodeRadius = 39.1*um;
-
+    // these need to be built right away to get some member variables
     Scint[i].Build(i);
     Wirechamber[i].Build(i);
     Frame[i].Build(i, Wirechamber[i].mwpcOverall_shape, Scint[i].scintOverall_shape,
                 Wirechamber[i].GetWidth(), Scint[i].GetWidth(), Scint[i].GetScintFacePos(),
                 Wirechamber[i].dMWPCExitR, Wirechamber[i].dMWPCEntranceR);
 
-    G4ThreeVector sideTransFrame = G4ThreeVector(0., 0., 2.2*m);
+    // rotation matrix is 0 or pi/2 at default
+    G4RotationMatrix* sideRot = new G4RotationMatrix();
+    sideRot -> rotateZ(fDetRot*Sign(i)*rad);
+    if(i == 0) sideRot -> rotateY(M_PI*rad);
+
+//    Wirechamber[i].ActiveRegion.dAnodeRadius = 5*um;    // Michael Brown's pre-sets for 2011/2012
+//    Wirechamber[i].ActiveRegion.dCathodeRadius = 39.1*um;
+
+    // These sideTrans_ vectors need to be declared AFTER building the objects since it calls the objects
+    G4ThreeVector sideTransFrame = G4ThreeVector(0., 0., 2.2*m - Frame[i].GetScintFacePos()) + vDetOffset;
     G4ThreeVector sideTransScint = sideTransFrame + G4ThreeVector(0., 0., -Scint[0].GetScintFacePos());
 
-    G4double frame_backWinFrameThick = 0.5*inch;  // originally placed further down but needed here
-    G4double mwpc_containerHalf_Z = (Wirechamber[0].GetWidth())/2.;       // this should be same for 0 or 1
-    G4double mwpc_PosZ = -mwpc_containerHalf_Z - frame_backWinFrameThick
-                - (Scint[0].GetWidth()/2. + Scint[0].GetScintFacePos());
+//    G4double frame_backWinFrameThick = 0.5*inch;  // originally placed further down but needed here
+//    G4double mwpc_containerHalf_Z = (Wirechamber[i].GetWidth())/2.;       // this should be same for 0 or 1
+//    G4double mwpc_PosZ = -(mwpc_containerHalf_Z) - frame_backWinFrameThick
+//                - (Scint[i].GetWidth()/2. + Scint[i].GetScintFacePos());
+    G4double mwpc_PosZ = -((Wirechamber[i].GetWidth())/2.) - Frame[i].dBackWinFrameThick
+                - (Scint[i].GetWidth()/2. + Scint[i].GetScintFacePos());
 
     G4ThreeVector sideTransMWPC = sideTransFrame + G4ThreeVector(0, 0, mwpc_PosZ);
 
+    // this also needs to be here since sideTransMWPC isn't created until just before this
+    Wirechamber[i].fMyRotation = sideRot;
+    Wirechamber[i].vMyTranslation = (*sideRot)*(Wirechamber[i].vMyTranslation);
     Wirechamber[i].vMyTranslation += Sign(i)*sideTransMWPC;
+    Wirechamber[i].dE0 = 2700*volt;
 
+    // places all the physical volumes. Uses Sign(i) method to get the (+/-)1 sign correct
     scint_phys[i] = new G4PVPlacement(sideRot, Sign(i)*sideTransScint, Scint[i].container_log,
 				Append(i, "scintContainer_"), experimentalHall_log, false, 0, true);
     mwpc_phys[i] = new G4PVPlacement(sideRot, Sign(i)*sideTransMWPC, Wirechamber[i].container_log,
 				Append(i, "mwpcContainer_"), experimentalHall_log, false, 0, true);
     frame_phys[i] = new G4PVPlacement(sideRot, Sign(i)*sideTransFrame, Frame[i].container_log,
 				Append(i, "framePackage_"), experimentalHall_log, false, 0, true);
-
-
   }
-/*
-    scint_phys[0] = new G4PVPlacement(EastSideRot, (-1)*sideTransScint, Scint[0].container_log,
-                                Append(0, "scintContainer_"), experimentalHall_log, false, 0, true);
-    mwpc_phys[0] = new G4PVPlacement(EastSideRot, (-1)*sideTransMWPC, Wirechamber[0].container_log,
-                                Append(0, "mwpcContainer_"), experimentalHall_log, false, 0, true);
-    frame_phys[0] = new G4PVPlacement(EastSideRot, (-1)*sideTransFrame, Frame[0].container_log,
-                                Append(0, "framePackage_"), experimentalHall_log, false, 0, true);
-    scint_phys[1] = new G4PVPlacement(NULL, sideTransScint, Scint[1].container_log,
-                                Append(1, "scintContainer_"), experimentalHall_log, false, 0, true);
-    mwpc_phys[1] = new G4PVPlacement(NULL, sideTransMWPC, Wirechamber[1].container_log,
-                                Append(1, "mwpcContainer_"), experimentalHall_log, false, 0, true);
-    frame_phys[1] = new G4PVPlacement(NULL, sideTransFrame, Frame[1].container_log,
-                                Append(1, "framePackage_"), experimentalHall_log, false, 0, true);
-*/
 
-  //----- Scintillator construction. Used as Sensitive Volume
-//  G4ThreeVector sideTransScintEast = G4ThreeVector(0., 0., (-1)*(2.2*m - scint_face_PosZ));
-//  G4ThreeVector sideTransScintWest = G4ThreeVector(0., 0., (2.2*m - scint_face_PosZ));
-/*  G4RotationMatrix* EastSideRot = new G4RotationMatrix();
-  EastSideRot -> rotateY(M_PI*rad);
-
+  //----- Set user limits in specific volumes
   for(int i = 0; i <= 1; i++)
-  {
-    Scint[i].Build(i);
-
-  }
-  scint_phys[0] = new G4PVPlacement(EastSideRot, G4ThreeVector(0,0, Sign(0)*(2.2*m - Scint[0].GetScintFacePos())),
-                                Scint[0].container_log, "scintContainer_EAST", experimentalHall_log, false, 0, true);
-  scint_phys[1] = new G4PVPlacement(NULL, G4ThreeVector(0,0, Sign(1)*(2.2*m - Scint[1].GetScintFacePos())),
-                                Scint[1].container_log, "scintContainer_WEST", experimentalHall_log, false, 0, true);
-
-  //----- Wirechamber construction. Interior ActiveRegion used as sensitive volume.
-  for(int i = 0; i <= 1; i++)
-  {
-    Wirechamber[i].ActiveRegion.dAnodeRadius = 5*um;	// Michael Brown's pre-sets for 2011/2012
-    Wirechamber[i].ActiveRegion.dCathodeRadius = 39.1*um;
-
-    Wirechamber[i].Build(i);
-  }
-
-//  G4double mwpc_exitRadius = Wirechamber[0].dMWPCExitR;
-//  G4double mwpc_entranceRadius = Wirechamber[0].dMWPCEntranceR;
-  G4double frame_backWinFrameThick = 0.5*inch;  // originally placed further down but needed here
-  G4double mwpc_containerHalf_Z = (Wirechamber[0].GetWidth())/2.;       // this should be same for 0 or 1
-  G4double mwpc_PosZ = -mwpc_containerHalf_Z - frame_backWinFrameThick
-                - (Scint[0].GetWidth()/2. + Scint[0].GetScintFacePos());
-
-  G4ThreeVector sideTransMWPCEast = G4ThreeVector(0,0, (-1)*(2.2*m + mwpc_PosZ));
-  G4ThreeVector sideTransMWPCWest = G4ThreeVector(0, 0, (2.2*m + mwpc_PosZ));
-
-  mwpc_phys[0] = new G4PVPlacement(EastSideRot, sideTransMWPCEast, Wirechamber[0].container_log,
-				"mwpcContainer_phys_EAST", experimentalHall_log, false, 0, true);
-  mwpc_phys[1] = new G4PVPlacement(NULL, sideTransMWPCWest, Wirechamber[1].container_log,
-				"mwpcContainer_phys_WEST", experimentalHall_log, false, 0, true);
-
-  //----- Finish up detector construction. Need to place frame_container_log in experimentalHall
-  G4ThreeVector frameTransEast = G4ThreeVector(0., 0., (-1)*(2.2*m));	// note: scint face position is 0 in local coord.
-									// Also there's no offset. So it's just -2.2m
-  G4ThreeVector frameTransWest = G4ThreeVector(0., 0., 2.2*m);
-
-  for(int i = 0; i <= 1; i++)
-  {
-    Frame[i].Build(i, Wirechamber[i].mwpcOverall_shape, Scint[i].scintOverall_shape,
-		Wirechamber[i].GetWidth(), Scint[i].GetWidth(), Scint[i].GetScintFacePos(),
-		Wirechamber[i].dMWPCExitR, Wirechamber[i].dMWPCEntranceR);
-  }
-  frame_phys[0] = new G4PVPlacement(EastSideRot, frameTransEast, Frame[0].container_log, "Frame_Package_EAST",
-					experimentalHall_log, false, 0, true);
-  frame_phys[1] = new G4PVPlacement(NULL, frameTransWest, Frame[1].container_log, "Frame_Package_WEST",
-					experimentalHall_log, false, 0, true);
-*/
-
-  for(int i = 0; i <= 1; i++)			// set user limits in specific volumes
   {
     Trap.decayTrapWin_log[i] -> SetUserLimits(UserSolidLimits);
     Wirechamber[i].container_log -> SetUserLimits(UserGasLimits);
@@ -324,7 +287,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     Wirechamber[i].kevStrip_log -> SetUserLimits(UserSolidLimits);
   }
 
-  // register logical volumes as sensitive detectors. Used for all info tracking during sim
+  //----- Register logical volumes as sensitive detectors. Used for all info tracking during sim
   for(int i = 0; i <= 1; i++)
   {
     SD_scint_scintillator[i] = RegisterSD(Append(i, "SD_scint_"), Append(i, "HC_scint_"));
@@ -396,15 +359,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   }
 */
 
-  G4double mwpc_fieldE0 = 2700*volt;
-  G4ThreeVector mwpc_activeRegionTrans(0, 0, (Wirechamber[0].dEntranceToCathodes - Wirechamber[0].dExitToCathodes)/2.);
+//  G4ThreeVector mwpc_activeRegionTrans(0, 0, (Wirechamber[0].dEntranceToCathodes - Wirechamber[0].dExitToCathodes)/2.);
 
   // Create everything needed for global and local EM fields
 //  G4ThreeVector East_EMFieldLocation = mwpc_activeRegionTrans + sideTransMWPCEast;
 //  G4ThreeVector West_EMFieldLocation = mwpc_activeRegionTrans + sideTransMWPCWest;
 
-  G4ThreeVector East_EMFieldLocation = mwpc_activeRegionTrans + Wirechamber[0].vMyTranslation;
-  G4ThreeVector West_EMFieldLocation = mwpc_activeRegionTrans + Wirechamber[1].vMyTranslation;
+//  G4ThreeVector East_EMFieldLocation = mwpc_activeRegionTrans + Wirechamber[0].vMyTranslation;
+//  G4ThreeVector West_EMFieldLocation = mwpc_activeRegionTrans + Wirechamber[1].vMyTranslation;
 
 
   ConstructGlobalField();			// make magnetic and EM fields.
@@ -412,11 +374,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   ConstructEastMWPCField(Wirechamber[0].ActiveRegion.dWireSpacing,
 			Wirechamber[0].ActiveRegion.dPlaneSpacing,
 			Wirechamber[0].ActiveRegion.dAnodeRadius,
-			mwpc_fieldE0, EastSideRot, East_EMFieldLocation);
+			Wirechamber[0].dE0,
+			Wirechamber[0].fMyRotation,
+			Wirechamber[0].vMyTranslation);
   ConstructWestMWPCField(Wirechamber[1].ActiveRegion.dWireSpacing,
                         Wirechamber[1].ActiveRegion.dPlaneSpacing,
                         Wirechamber[1].ActiveRegion.dAnodeRadius,
-                        mwpc_fieldE0, NULL, West_EMFieldLocation);
+                        Wirechamber[1].dE0,
+			Wirechamber[1].fMyRotation,
+			Wirechamber[1].vMyTranslation);
   return experimentalHall_phys;
 }
 
