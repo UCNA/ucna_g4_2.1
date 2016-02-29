@@ -82,6 +82,11 @@ DetectorConstruction::DetectorConstruction()
   uiUseFoilCmd -> SetDefaultValue(false);
   bUseFoil = false;                             // ...since some of these SetDefaultVolume...
 
+  uiUseSourceHolderCmd = new G4UIcmdWithABool("/detector/sourceholder",this);
+  uiUseSourceHolderCmd -> SetGuidance("Set true to build source holder object");
+  uiUseSourceHolderCmd -> SetDefaultValue(false);
+  bUseSourceHolder = false;
+
   uiSourceFoilThickCmd = new G4UIcmdWithADoubleAndUnit("/detector/sourcefoilthick",this);
   uiSourceFoilThickCmd -> SetGuidance("Set source foil full thickness");
   fSourceFoilThick = 7.2*um;
@@ -132,6 +137,11 @@ void DetectorConstruction::SetNewValue(G4UIcommand * command, G4String newValue)
     bUseFoil = uiUseFoilCmd->GetNewBoolValue(newValue);
     G4cout << "Setting In source foil construction to " << bUseFoil << G4endl;
   }
+  else if (command == uiUseSourceHolderCmd)
+  {
+    bUseSourceHolder = uiUseSourceHolderCmd->GetNewBoolValue(newValue);
+    G4cout << "Setting source holder construction to " << bUseSourceHolder << G4endl;
+  }
   else if(command == uiSourceFoilThickCmd)
   {
     fSourceFoilThick = uiSourceFoilThickCmd->GetNewDoubleValue(newValue);
@@ -179,9 +189,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         // note this has not been implemented yet
   }
   Source.Build();
-  // And we don't place the source holder object until later.
-//  source_phys = new G4PVPlacement(NULL, source_holderPos, source_container_log, "source_container_phys",
-//                               experimentalHall_log, false, 0, true);
+  if(bUseSourceHolder == true)
+  {
+    source_phys = new G4PVPlacement(NULL, vSourceHolderPos, Source.sourceContainer_log, "source_container_phys",
+                                 experimentalHall_log, false, 0, true);
+    G4cout << "Placing source holder object in the physical world." << G4endl;
+  }
+
 
   // Set the geometry dependent settings of our detector
   G4cout << "Using geometry '" << sGeometry << "' ..." << G4endl;

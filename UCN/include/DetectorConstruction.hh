@@ -63,6 +63,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction, G4UImessenger, 
     G4String fSDNamesArray[fNbSDs];	// needs to be public since EventAction will access all elements
     G4String fHCNamesArray[fNbSDs];
 
+    G4ThreeVector GetSourceHolderPos() { return vSourceHolderPos; };
+    G4bool GetUseSourceHolder() { return bUseSourceHolder; };
+
   private:
     void ConstructGlobalField();
     void ConstructEastMWPCField(G4double a, G4double b, G4double c, G4double d,
@@ -105,10 +108,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction, G4UImessenger, 
     G4ThreeVector vDetOffset;
 
     G4UIcmdWithADouble* uiDetRotCmd;            // symmetrical detector rotation angle around Z axis (radians, hence no units)
-    float fDetRot;
+    G4float fDetRot;
 
     G4UIcmdWithABool* uiUseFoilCmd;             // construction of Indium 10um Al source foil
-    bool bUseFoil;
+    G4bool bUseFoil;
+
+    G4UIcmdWithABool* uiUseSourceHolderCmd;             // construction of source holder
+    G4bool bUseSourceHolder;
 
     G4UIcmdWithADoubleAndUnit* uiVacuumLevelCmd;        // SCS bore vacuum
     G4float fVacuumPressure;

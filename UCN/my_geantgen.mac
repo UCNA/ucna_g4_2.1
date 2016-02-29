@@ -4,7 +4,8 @@
 # detector vacuum pressure
 /detector/vacuum 1.e-5 torr		# LEGIT VACUUM PRESSURE FOR FINAL RUN
 
-/detector/sourceholderpos 0 0.5 0 m	# doesn't matter since we don't place it using G4PVPlacement
+/detector/sourceholderpos 0 0.5 0 m
+/detector/sourceholder true		# either place source holder in world or not
 
 # extra pre-initialization commands here
 /detector/sourcefoilthick 9.5 um	# THESE ARE THE LEGIT COMMANDS USED LATER
@@ -19,4 +20,4 @@
 ###### Run initialization and start
 
 /run/initialize
-/run/beamOn 300000
+/run/beamOn 100
