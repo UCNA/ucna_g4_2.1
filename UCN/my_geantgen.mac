@@ -2,22 +2,17 @@
 # spectrometer decay trap geometry name
 /detector/geometry 2011/2012
 # detector vacuum pressure
-#/detector/vacuum 1.e-5 torr		# LEGIT VACUUM PRESSURE FOR FINAL RUN
-/detector/vacuum 0 torr
+/detector/vacuum 1.e-5 torr		# LEGIT VACUUM PRESSURE FOR FINAL RUN
 
 /detector/sourceholderpos 0 0.5 0 m	# doesn't matter since we don't place it using G4PVPlacement
 
 # extra pre-initialization commands here
-#/detector/sourcefoilthick 9.5 um	# THESE ARE THE LEGIT COMMANDS USED LATER
-#/detector/rotation 0.037
-#/detector/offset -3.98 0.44 0 mm
-
-/detector/sourcefoilthick 9.4 um
-/detector/rotation 0
-/detector/offset 0 0 0 mm
+/detector/sourcefoilthick 9.5 um	# THESE ARE THE LEGIT COMMANDS USED LATER
+/detector/rotation 0.037
+/detector/offset -3.98 0.44 0 mm
 
 # Supply the full path to input ptcl file, and names of the output files
-/particleGun/inputName /home/xuansun/Documents/Caltech/UCNA_Sim/ucna_g4Sim_XSun_2.1/ucna_g4_2.1/UCN/EventGenTools/G4Sim_Ptcl_Input_Files/big_initPtclInfo.txt
+/particleGun/inputName /home/xuansun/Documents/Caltech/UCNA_Sim/ucna_g4_2.1/UCN/EventGenTools/G4Sim_Ptcl_Input_Files/big_initPtclInfo.txt
 /particleGun/outputName UCNASimOutput.txt	# Note: these two output names (and paths)
 /event/outputName UCNASimOutput.txt		# need to be identical
 

@@ -84,8 +84,8 @@ DetectorConstruction::DetectorConstruction()
 
   uiSourceFoilThickCmd = new G4UIcmdWithADoubleAndUnit("/detector/sourcefoilthick",this);
   uiSourceFoilThickCmd -> SetGuidance("Set source foil full thickness");
-//  fSourceFoilThick = 7.2*um;
-  fSourceFoilThick = 9.4*um;
+  fSourceFoilThick = 7.2*um;
+//  fSourceFoilThick = 9.4*um;
   uiSourceFoilThickCmd -> SetDefaultValue(fSourceFoilThick);
   uiSourceFoilThickCmd -> AvailableForStates(G4State_PreInit);
 
@@ -215,20 +215,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 
   //----- Decay Trap object (length 3m, main tube)
-/*  Trap.dWindowThick = 0.50*um;	// M.Brown sets these before we enter geometry choice
-  Trap.dCoatingThick = 0.150*um;
-
-  // 2011/2012 geometry settings are:
-  Trap.dWindowThick = 0.500*um;
-  Trap.mDecayTrapWindowMat = Mylar;
-  Trap.dInnerRadiusOfCollimator = 2.3*inch;
-  Trap.dCollimatorThick = 0.7*inch;
-  // Stuff pertaining to wirechamber volume cathode/anode radius
-//  G4double wireVol_anodeRadius = 5*um;
-//  G4double wireVol_cathodeRadius = 39.1*um;
-*/
-
-  // make the DecayTrapConstruction object.
   Trap.Build(experimentalHall_log, fCrinkleAngle);
 
   // place the scint and mwpc and detector frames in a loop
@@ -246,20 +232,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     sideRot -> rotateZ(fDetRot*Sign(i)*rad);
     if(i == 0) sideRot -> rotateY(M_PI*rad);
 
-//    Wirechamber[i].ActiveRegion.dAnodeRadius = 5*um;    // Michael Brown's pre-sets for 2011/2012
-//    Wirechamber[i].ActiveRegion.dCathodeRadius = 39.1*um;
-
     // These sideTrans_ vectors need to be declared AFTER building the objects since it calls the objects
     G4ThreeVector sideTransFrame = G4ThreeVector(0., 0., 2.2*m - Frame[i].GetScintFacePos()) + vDetOffset;
     G4ThreeVector sideTransScint = sideTransFrame + G4ThreeVector(0., 0., -Scint[0].GetScintFacePos());
 
-//    G4double frame_backWinFrameThick = 0.5*inch;  // originally placed further down but needed here
-//    G4double mwpc_containerHalf_Z = (Wirechamber[i].GetWidth())/2.;       // this should be same for 0 or 1
-//    G4double mwpc_PosZ = -(mwpc_containerHalf_Z) - frame_backWinFrameThick
-//                - (Scint[i].GetWidth()/2. + Scint[i].GetScintFacePos());
     G4double mwpc_PosZ = -((Wirechamber[i].GetWidth())/2.) - Frame[i].dBackWinFrameThick
                 - (Scint[i].GetWidth()/2. + Scint[i].GetScintFacePos());
-
     G4ThreeVector sideTransMWPC = sideTransFrame + G4ThreeVector(0, 0, mwpc_PosZ);
 
     // this also needs to be here since sideTransMWPC isn't created until just before this
@@ -359,17 +337,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   }
 */
 
-//  G4ThreeVector mwpc_activeRegionTrans(0, 0, (Wirechamber[0].dEntranceToCathodes - Wirechamber[0].dExitToCathodes)/2.);
 
-  // Create everything needed for global and local EM fields
-//  G4ThreeVector East_EMFieldLocation = mwpc_activeRegionTrans + sideTransMWPCEast;
-//  G4ThreeVector West_EMFieldLocation = mwpc_activeRegionTrans + sideTransMWPCWest;
-
-//  G4ThreeVector East_EMFieldLocation = mwpc_activeRegionTrans + Wirechamber[0].vMyTranslation;
-//  G4ThreeVector West_EMFieldLocation = mwpc_activeRegionTrans + Wirechamber[1].vMyTranslation;
-
-
-  ConstructGlobalField();			// make magnetic and EM fields.
+  // make magnetic and EM fields everywhere
+  ConstructGlobalField();
 
   ConstructEastMWPCField(Wirechamber[0].ActiveRegion.dWireSpacing,
 			Wirechamber[0].ActiveRegion.dPlaneSpacing,
