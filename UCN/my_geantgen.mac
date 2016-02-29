@@ -2,13 +2,13 @@
 # spectrometer decay trap geometry name
 /detector/geometry 2011/2012
 # detector vacuum pressure
-/detector/vacuum 1.e-5 torr		# LEGIT VACUUM PRESSURE FOR FINAL RUN
+/detector/vacuum 1.e-5 torr
 
-/detector/sourceholderpos 0 0.5 0 m
+/detector/sourceholderpos 0 0 0 m
 /detector/sourceholder true		# either place source holder in world or not
-
+					# this ^^ is very dependent on the file type of /particleGun/inputName
 # extra pre-initialization commands here
-/detector/sourcefoilthick 9.5 um	# THESE ARE THE LEGIT COMMANDS USED LATER
+/detector/sourcefoilthick 9.5 um
 /detector/rotation 0.037
 /detector/offset -3.98 0.44 0 mm
 

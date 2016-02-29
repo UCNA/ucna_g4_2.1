@@ -21,9 +21,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
 : G4VUserPrimaryGeneratorAction(), G4UImessenger(),
   fParticleGun(0),
   fMyDetector(myDC),
-//  fSourceRadius(3.*mm),	// this is default set. If you aren't using DiskRandom, don't care.
-  fSourceRadius(0),
-  fPosOffset(G4ThreeVector(0,0,0)),	// if it's not a source, then set to 0
+  fSourceRadius(3.*mm),	// this is default set. If you aren't using DiskRandom, don't care.
+  fPosOffset(G4ThreeVector(0,0,0)),	// base positioning offset. Is non-zero only if main Decay Trap is offset (it is not)
   bIsLoaded(false)
 {
   //----- Below is messenger class
@@ -72,15 +71,25 @@ void PrimaryGeneratorAction::SetNewValue(G4UIcommand* command, G4String newValue
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
+  // use GEANT4 event id to track which part of fEvtsArray we will use for generated event
+  int nID = anEvent -> GetEventID();
+
   if(bIsLoaded == false)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
     LoadFile(sInputFileName);
+
+    if(fMyDetector -> GetUseSourceHolder() == false)
+    {
+      G4cout << "\n Loading neutron beta decay events..." << G4endl;
+    }
+    else if(fMyDetector -> GetUseSourceHolder() == true)
+    {
+      G4cout << "\n Adjusting initial ptcl position for source holder use..." << G4endl;
+      G4cout << " Randomly throwing events in source holder radius: " << fSourceRadius/mm << " mm." << G4endl;
+    }
+
   }
-
-
-  // use GEANT4 event id to track which part of fEvtsArray we will use for generated event
-  int nID = anEvent -> GetEventID();
 
   // use the particle species flag to set particle type
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
@@ -101,16 +110,37 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   fParticleGun -> SetParticleEnergy(fEvtsArray[nID].event_energy*keV);
 
-  fParticleGun -> SetParticlePosition(G4ThreeVector(fEvtsArray[nID].event_xPos*m,
-						fEvtsArray[nID].event_yPos*m,
-						fEvtsArray[nID].event_zPos*m));
+  G4ThreeVector pos = fPosOffset;	// so far in my simulation this is 0
+  if(fMyDetector -> GetUseSourceHolder() == false)
+  {
+    pos[0] += fEvtsArray[nID].event_xPos*m;
+    pos[1] += fEvtsArray[nID].event_yPos*m;
+    pos[2] += fEvtsArray[nID].event_zPos*m;
+    fParticleGun -> SetParticlePosition(pos);
+  }
+  else if(fMyDetector -> GetUseSourceHolder() == true)
+  {
+    pos += fMyDetector ->  GetSourceHolderPos();
+    if(fSourceRadius != 0)
+    {
+      G4double x,y;
+      DiskRandom(fSourceRadius, x, y);
+      pos[0] += x;
+      pos[1] += y;
+
+      pos[0] += fEvtsArray[nID].event_xPos*m;
+      pos[1] += fEvtsArray[nID].event_yPos*m;
+      pos[2] += fEvtsArray[nID].event_zPos*m;
+    }
+    fParticleGun -> SetParticlePosition(pos);
+  }
 
   fParticleGun -> SetParticleMomentumDirection(G4ThreeVector(fEvtsArray[nID].event_xMo,
-						fEvtsArray[nID].event_yMo,
-						fEvtsArray[nID].event_zMo));
-
+                                                fEvtsArray[nID].event_yMo,
+                                                fEvtsArray[nID].event_zMo));
 
   fParticleGun -> SetParticleTime(fEvtsArray[nID].event_time*ns);
+
 
   // Call to method to save primary particle initial info.
   // Need to be super careful here. A Priori, there's no reason that the momentum vector
@@ -162,8 +192,8 @@ void PrimaryGeneratorAction::DiskRandom(G4double radius, G4double& x, G4double& 
 {
   while(true)
   {
-    x = (2.0*G4UniformRand()-1.)*radius;
-    y = (2.0*G4UniformRand()-1.)*radius;
+    x = (2.0*G4UniformRand()-1.)*radius;	// random number between 0 and 2, subtract 1
+    y = (2.0*G4UniformRand()-1.)*radius;	// goes randomly between -1 to +1
     if(x*x+y*y<=radius*radius) break;
   }
 }
@@ -195,14 +225,8 @@ void PrimaryGeneratorAction::SavePrimPtclInfo(int index)
 	<< fEvtsArray[index].event_zMo << "\t"
 	<< fEvtsArray[index].event_time << "\t"
 	<< fEvtsArray[index].event_weight << "\t";	// has to be a \t since getting appended in EventAction
-
-	// while debugging TrackerSD and TrackerHit, this is what we print.
-//  outfile << fEvtsArray[index].event_gen_id << "\t"
-//	<< fEvtsArray[index].event_energy << "\t";
   outfile.close();
 }
-
-
 
 
 

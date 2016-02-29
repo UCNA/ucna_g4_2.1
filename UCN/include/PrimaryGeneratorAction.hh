@@ -71,12 +71,13 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     bool bIsLoaded;			// check if we've already loaded the input ptcl file
     G4double fSourceRadius;		// spread radius for source droplets
     G4ThreeVector fPosOffset;		// base positioning offset
-    event fEvtsArray[1000000];		// size has to be number of lines in input file
+    event fEvtsArray[2000000];		// size has to be number of lines in input file
 
     void LoadFile(G4String fileName);
     void DiskRandom(G4double radius, G4double& x, G4double& y);
     void DisplayGunStatus();
     void SavePrimPtclInfo(int index);
+
     void Set_113SnSource();
 
     // UI command variables for messenger class input/output files
