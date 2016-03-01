@@ -2,8 +2,8 @@
 
 WirechamberConstruction::WirechamberConstruction()
 : dWindowThick(6*um), dMWPCEntranceR(7.0*cm), dMWPCExitR(7.5*cm),
-mMWPCActiveRegionGas(WCPentane), dEntranceToCathodes(5.0*mm), dExitToCathodes(5.0*mm), dE0(0)
-{
+mMWPCActiveRegionGas(WCPentane), dEntranceToCathodes(/*5.0*mm */10.0*mm), dExitToCathodes(5.0*mm), dE0(0)
+{							// additional "bowing" from M.Mendenhall.
   // can again do stuff in this constructor. But class members already set.
 }
 
