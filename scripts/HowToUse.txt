@@ -1,0 +1,13 @@
+NOTE: need to run in UCNA_BASE directory.
+
+1) need to run setup-geant.sh to set all GEANT4 environment variables.
+Type either
+. setup-geant.sh OR source setup-geant.sh
+
+(Optional) Run install-geant.sh to install GEANT4.
+./install-geant.sh
+
+2) Next use build-ucna.
+./build-ucna
+
+3) Can ignore the install-ucna since it is old stuff.
