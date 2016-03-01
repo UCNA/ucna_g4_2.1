@@ -10,8 +10,8 @@ using namespace ROOT::Math;
 
 void mi_evtgen(StreamInteractor* S) {
 
-	std::string base = getend("UCNA_BASE");
-	std::string path = base + "UCN/EventGenTools";
+	std::string base = getenv("UCNA_BASE");
+	std::string path = base + "/UCN/EventGenTools";
 
 	// load arguments
 	const unsigned int nTrees = S->popInt();
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 //	run_evt_gen.addArg("Output path",getEnvSafe("G4EVTDIR"));
 
 	std::string base = getenv("UCNA_BASE");
-	std::string path = "UCN/EventGenTools";
+	std::string path = base + "/UCN/EventGenTools";
 
 	run_evt_gen.addArg("Output path", path);
 	run_evt_gen.addArg(&selectVertexPos);

@@ -256,7 +256,7 @@ void PrimaryGeneratorAction::SavePrimPtclInfo(int index)
 
 
 //***** OLD CODE I WROTE EARLIER TO "TEST" 113SN SOURCE *****//
-
+/*
 void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional arguments since we set the particle gun.
 {
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
@@ -324,7 +324,7 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
   G4double uy = sinAlpha*sin(phi);
   G4double uz = cosAlpha;
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(ux,uy,uz));
-
+*/
 /*  G4ThreeVector newUz;        // fires isotropic cone where cone axis can be rotated.
   G4double theta, phi, apex;
 
@@ -347,7 +347,7 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
 
   fParticleGun->SetParticleMomentumDirection(dir);
 */
-
+/*
   //----- Setting the particle generation position
   G4double x0 = 0;              // Says it is negligibly thin.
   G4double y0 = 0;              // Brad told me the source radius
@@ -360,3 +360,4 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
   fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
 
 }
+*/

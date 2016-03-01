@@ -78,7 +78,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     void DisplayGunStatus();
     void SavePrimPtclInfo(int index);
 
-    void Set_113SnSource();
+//    void Set_113SnSource();
 
     // UI command variables for messenger class input/output files
     G4UIdirectory* uiGenDir;	// UI directory for primaryGeneratorAction related commands

@@ -80,11 +80,13 @@ DetectorConstruction::DetectorConstruction()
   uiUseFoilCmd = new G4UIcmdWithABool("/detector/infoil",this);
   uiUseFoilCmd -> SetGuidance("Set true to build In source foil instead of usual sealed sources");
   uiUseFoilCmd -> SetDefaultValue(false);
+  uiUseFoilCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
   bUseFoil = false;                             // ...since some of these SetDefaultVolume...
 
   uiUseSourceHolderCmd = new G4UIcmdWithABool("/detector/sourceholder",this);
   uiUseSourceHolderCmd -> SetGuidance("Set true to build source holder object");
   uiUseSourceHolderCmd -> SetDefaultValue(false);
+  uiUseSourceHolderCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
   bUseSourceHolder = false;
 
   uiSourceFoilThickCmd = new G4UIcmdWithADoubleAndUnit("/detector/sourcefoilthick",this);
