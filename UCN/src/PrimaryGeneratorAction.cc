@@ -23,7 +23,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
   fMyDetector(myDC),
   fSourceRadius(3.*mm),	// this is default set. If you aren't using DiskRandom, don't care.
   fPosOffset(G4ThreeVector(0,0,0)),	// base positioning offset. Is non-zero only if main Decay Trap is offset (it is not)
-  bIsLoaded(false)
+  bIsLoaded(false), bUseExternal(false),
+  iCoincidencePtcl(-1), iNbCoincidence(0), bCoincidenceWasFired(false)
 {
   //----- Below is messenger class
 
@@ -72,8 +73,62 @@ void PrimaryGeneratorAction::SetNewValue(G4UIcommand* command, G4String newValue
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   // use GEANT4 event id to track which part of fEvtsArray we will use for generated event
-  int nID = anEvent -> GetEventID();
+  int evtID = anEvent -> GetEventID();
 
+  if(bUseExternal == true)
+  {
+    if(evtID == 0)
+    {
+      G4cout << "Using external kinematics file to generate initial particles... " << G4endl;
+    }
+    UseExternalKinFile(evtID);
+    SavePrimPtclInfo(evtID);
+  }
+  else if(bUseExternal == false)
+  {
+    // note this will look different than loading the external kinematics file
+    // because we need to be able to account for Auger and other coincidence particles
+    if(evtID == 0)
+    {
+      G4cout << "Using GEANT4 particle generation to create initial particles..." << G4endl;
+    }
+
+    Set_113SnSource();	// processes all decays of 113Sn that we are interested in
+
+    if(bCoincidenceWasFired == false)
+    {
+      SavePrimPtclInfo(evtID);
+    }
+    else if(bCoincidenceWasFired == true)
+    {
+      // save primary ptcl info as same event number so we can add up later
+      SavePrimPtclInfo(evtID - iNbCoincidence);
+      // since we've now accounted for one coincidence, lower the number of coincidences in the counter
+      iNbCoincidence = iNbCoincidence - 1;
+      if(iNbCoincidence < 0)
+	G4cout << "RUN-TIME ERROR IN CODE. iNbCoincidence went below 0. Makes no sense." << G4endl;
+
+      if(iNbCoincidence == 0)
+        iCoincidencePtcl = -1;		// if we have no more coincidences, reset the ptcl flag to -1
+
+    }
+
+  }
+
+
+  // Call to method to save primary particle initial info.
+  // Need to be super careful here. A Priori, there's no reason that the momentum vector
+  // is normalized when I'm reading it from final.
+  // And momentum direction is a normalized vector once GEANT4 gets a hold of it.
+  // So when we print out what was read in vs. what we get from particle gun may not be the same.
+  // Will need to check this. For now it is the same within float to double rounding.
+//  SavePrimPtclInfo(evtID);
+
+  fParticleGun -> GeneratePrimaryVertex(anEvent);
+}
+
+void PrimaryGeneratorAction::UseExternalKinFile(int nID)
+{
   if(bIsLoaded == false)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
@@ -106,11 +161,12 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   {
     G4cout << "No matching particle species definition." << G4endl;
   }
+
   fParticleGun -> SetParticleDefinition(particle);
 
   fParticleGun -> SetParticleEnergy(fEvtsArray[nID].event_energy*keV);
 
-  G4ThreeVector pos = fPosOffset;	// so far in my simulation this is 0
+  G4ThreeVector pos = fPosOffset;       // so far in my simulation this is 0
   if(fMyDetector -> GetUseSourceHolder() == false)
   {
     pos[0] += fEvtsArray[nID].event_xPos*m;
@@ -141,16 +197,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
   fParticleGun -> SetParticleTime(fEvtsArray[nID].event_time*ns);
 
-
-  // Call to method to save primary particle initial info.
-  // Need to be super careful here. A Priori, there's no reason that the momentum vector
-  // is normalized when I'm reading it from final.
-  // And momentum direction is a normalized vector once GEANT4 gets a hold of it.
-  // So when we print out what was read in vs. what we get from particle gun may not be the same.
-  // Will need to check this. For now it is the same within float to double rounding.
-  SavePrimPtclInfo(nID);
-
-  fParticleGun -> GeneratePrimaryVertex(anEvent);
 }
 
 void PrimaryGeneratorAction::LoadFile(G4String fileName)
@@ -229,81 +275,114 @@ void PrimaryGeneratorAction::SavePrimPtclInfo(int index)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//***** OLD CODE I WROTE EARLIER TO "TEST" 113SN SOURCE *****//
-/*
 void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional arguments since we set the particle gun.
 {
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
   G4ParticleDefinition* particle;
 
-  //----- Setting species and energy of particle decided by CE random sampling from nndc
-  int r1;
-  r1 = rand() % 1007246 + 1;    // This bound is # of digits I want to produce
-                                // NOTE not set to 100 because on nndc we get 100.7% for 391 keV gammas.
-  double percentage = r1/10000.;        // This gives us 0.001 precision.
+  int r1;	// total percentage of stuff we're interested in for 113Sn
+  r1 = rand() % 1029306 + 1;
+  double percentage = r1/10000.;
 
-  if((percentage >= 0) && (percentage <= 64.97))
+  if(iNbCoincidence > 0)
   {
-    fParticleGun -> SetParticleEnergy(391.698*keV);
-    particle = particleTable->FindParticle(particleName="gamma");
-    fParticleGun -> SetParticleMomentumDirection(G4ThreeVector(0,1,0));
+    if(iCoincidencePtcl == 1)		// create a K shell Auger electron for 113Sn
+    {
+      fParticleGun -> SetParticleEnergy(20.1*keV);
+      particle = particleTable -> FindParticle(particleName="e-");
+    }
+    // technically, here you would put other options for other coincidences.
+    // for 113Sn, there is no other coincidence that we care about.
+
+    bCoincidenceWasFired = true;        // sets the flag stating that we created a ptcl
+                                        // that is intended to be recorded in coincidence
   }
-  else if((percentage > 64.97) && (percentage <= 93.77))
+  else if(iNbCoincidence == 0)
   {
-    fParticleGun -> SetParticleEnergy(363.758*keV);
-    particle = particleTable -> FindParticle(particleName="e-");
+    bCoincidenceWasFired = false;	// sets the flag stating we are using a coincidence for this event to false
+					// meaning this is a ptcl generated that is not supposed to be a coincidence.
+    if((percentage >= 0) && (percentage <= 64.97))
+    {	// fires a gamma in the decay from 1st excited to ground state
+      fParticleGun -> SetParticleEnergy(391.698*keV);
+      particle = particleTable->FindParticle(particleName="gamma");
+    }
+    else if((percentage > 64.97) && (percentage <= 100.7246))
+    {	// produces a Conversion Electron from 1st excited state to GS
+
+      int r2 = rand() % 1000000 + 1;
+      double AugerPercent = r2/10000.;	// check whether the CE also comes with an Auger
+      if((AugerPercent >= 0) && (AugerPercent <= 11.8056))
+      {
+        iCoincidencePtcl = 1;	// sets the flag to produce an Auger
+        iNbCoincidence++;	// increments our coincidence counter so next event, we produce an Auger
+      }
+
+      // whether or not the Auger flag checks out, we produce all the CE down here.
+      // These are, in order, the K, L, M, N, O shell Conversion Electron energies.
+      if((percentage > 64.97) && (percentage <= 93.77))
+      {
+        fParticleGun -> SetParticleEnergy(363.758*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 93.77) && (percentage <= 99.37))
+      {
+        fParticleGun -> SetParticleEnergy(387.461*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 99.37) && (percentage <= 100.507))
+      {
+        fParticleGun -> SetParticleEnergy(390.872*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 100.507) && (percentage <= 100.712))
+      {
+        fParticleGun -> SetParticleEnergy(391.576*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 100.712) && (percentage <= 100.7246))
+      {
+        fParticleGun -> SetParticleEnergy(391.697*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+    }
+    else if((percentage > 100.7246) && (percentage <= 102.8346))
+    {	// fires a gamma ray in the decay of the second excited state to 1st excited
+      fParticleGun -> SetParticleEnergy(255.134*keV);
+      particle = particleTable -> FindParticle(particleName="gamma");
+    }
+    else if((percentage > 102.8346) && (percentage <= 102.9306))
+    {
+      // here is where we would typically throw another Auger check.
+      // Since there is a non-zero probability that we'll get another, second, coincidence Auger.
+      // But since it is such small prob (11% of 0.06%), we'll ignore it altogether.
+
+	// fires CE from 2nd excited to 1st excited
+	// in order, the CE are K, L, M, N shell CE being released. We assume neglible # of Auger's accompany them.
+      if((percentage > 102.8346)  && (percentage <= 102.9166))
+      {
+        fParticleGun -> SetParticleEnergy(227.194*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 102.9166) && (percentage <= 102.928))
+      {
+        fParticleGun -> SetParticleEnergy(250.896*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 102.9280) && (percentage <= 102.9302))
+      {
+        fParticleGun -> SetParticleEnergy(254.308*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+      else if((percentage > 102.9302) && (percentage <= 102.9306))
+      {
+        fParticleGun -> SetParticleEnergy(255.012*keV);
+        particle = particleTable -> FindParticle(particleName="e-");
+      }
+    }
+
   }
-  else if((percentage > 93.77) && (percentage <= 99.37))
-  {
-    fParticleGun -> SetParticleEnergy(387.461*keV);
-    particle = particleTable -> FindParticle(particleName="e-");
-  }
-  else if((percentage > 99.37) && (percentage <= 100.507))
-  {
-    fParticleGun -> SetParticleEnergy(390.872*keV);
-    particle = particleTable -> FindParticle(particleName="e-");
-  }
-  else if((percentage > 100.507) && (percentage <= 100.712))
-  {
-    fParticleGun -> SetParticleEnergy(391.576*keV);
-    particle = particleTable -> FindParticle(particleName="e-");
-  }
-  else if((percentage > 100.712) && (percentage <= 100.7246))
-  {
-    fParticleGun -> SetParticleEnergy(391.697*keV);
-    particle = particleTable -> FindParticle(particleName="e-");
-  }
-  else if((percentage > 100.7246) || (percentage < 0))
-  {
-    G4cout << "Random number sampled beyond the scope of the decay." << G4endl;
-  }
+
 
   fParticleGun->SetParticleDefinition(particle);
   fParticleGun->SetParticleTime(0.0*ns);        // Michael's has this line. Idk why.
@@ -324,7 +403,26 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
   G4double uy = sinAlpha*sin(phi);
   G4double uz = cosAlpha;
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(ux,uy,uz));
-*/
+
+
+  //----- Setting the particle generation position
+  G4double x0 = 0;              // Says it is negligibly thin.
+  G4double y0 = 0;              // Brad told me the source radius
+  G4double z0 = 0;
+
+  x0 += fPosOffset[0];		// this is (0,0,0) in my sim and Mendenhall's
+  y0 += fPosOffset[1];
+  z0 += fPosOffset[2];
+
+  if(fSourceRadius != 0)
+  {
+    DiskRandom(fSourceRadius, x0, y0);
+  }
+
+  fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
+
+}
+
 /*  G4ThreeVector newUz;        // fires isotropic cone where cone axis can be rotated.
   G4double theta, phi, apex;
 
@@ -347,17 +445,4 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
 
   fParticleGun->SetParticleMomentumDirection(dir);
 */
-/*
-  //----- Setting the particle generation position
-  G4double x0 = 0;              // Says it is negligibly thin.
-  G4double y0 = 0;              // Brad told me the source radius
-  G4double z0 = 0;
-  if(fSourceRadius != 0)
-  {
-    DiskRandom(fSourceRadius, x0, y0);
-  }
 
-  fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
-
-}
-*/

@@ -69,16 +69,24 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     DetectorConstruction* fMyDetector;	// pointer to the detector geometry class
 
     bool bIsLoaded;			// check if we've already loaded the input ptcl file
+
+    G4int iCoincidencePtcl;		// flag to see if we want to produce a coincidence ptcl
+					//	-1 = default value in code
+					//	+1 = Auger electron, ...
+    G4int iNbCoincidence;		// number of coincidence particles we'll produce
+    G4bool bCoincidenceWasFired;	// keeps track of the ordering of Set_113Sn vs SavePrimPtclInfo
+
     G4double fSourceRadius;		// spread radius for source droplets
     G4ThreeVector fPosOffset;		// base positioning offset
     event fEvtsArray[2000000];		// size has to be number of lines in input file
 
+    void UseExternalKinFile(int nID);
     void LoadFile(G4String fileName);
     void DiskRandom(G4double radius, G4double& x, G4double& y);
     void DisplayGunStatus();
     void SavePrimPtclInfo(int index);
 
-//    void Set_113SnSource();
+    void Set_113SnSource();
 
     // UI command variables for messenger class input/output files
     G4UIdirectory* uiGenDir;	// UI directory for primaryGeneratorAction related commands
@@ -88,6 +96,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
 
     G4UIcmdWithAString* uiOutputFileCmd;	// which output file name to take
     G4String sOutputFileName;
+
+    G4bool bUseExternal;		// whether we use external kinematics file or not
 
 };
 
