@@ -85,6 +85,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     void DiskRandom(G4double radius, G4double& x, G4double& y);
     void DisplayGunStatus();
     void SavePrimPtclInfo(int index);
+    void SavePrimPtclInfo2(int eventID);	// used for particles generated in the GEANT4 sim
 
     void Set_113SnSource();
 

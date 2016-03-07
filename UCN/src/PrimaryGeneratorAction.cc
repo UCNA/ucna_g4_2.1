@@ -97,12 +97,12 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
     if(bCoincidenceWasFired == false)
     {
-      SavePrimPtclInfo(evtID);
+      SavePrimPtclInfo2(evtID);
     }
     else if(bCoincidenceWasFired == true)
     {
       // save primary ptcl info as same event number so we can add up later
-      SavePrimPtclInfo(evtID - iNbCoincidence);
+      SavePrimPtclInfo2(evtID - iNbCoincidence);
       // since we've now accounted for one coincidence, lower the number of coincidences in the counter
       iNbCoincidence = iNbCoincidence - 1;
       if(iNbCoincidence < 0)
@@ -254,6 +254,25 @@ void PrimaryGeneratorAction::DisplayGunStatus()
   << "ns : gun firing at energy " << fParticleGun->GetParticleEnergy()/keV
   << "keV" <<
   G4endl;
+}
+
+void PrimaryGeneratorAction::SavePrimPtclInfo2(int eventID)
+{
+  ofstream outfile;
+  outfile.open(sOutputFileName, ios::app);
+  outfile << eventID << "\t"
+	  << fParticleGun->GetParticleDefinition()->GetPDGEncoding() << "\t"
+	  << fParticleGun->GetParticleEnergy()/keV << "\t"
+	  << fParticleGun->GetParticlePosition()[0]/m << "\t"
+	  << fParticleGun->GetParticlePosition()[1]/m << "\t"
+	  << fParticleGun->GetParticlePosition()[2]/m << "\t"
+	  << fParticleGun->GetParticleMomentumDirection()[0] << "\t"
+	  << fParticleGun->GetParticleMomentumDirection()[1] << "\t"
+	  << fParticleGun->GetParticleMomentumDirection()[2] << "\t"
+	  << fParticleGun->GetParticleTime()/ns << "\t"
+	  << "1 \t";	// this is done since all weights are 1
+  outfile.close();
+
 }
 
 void PrimaryGeneratorAction::SavePrimPtclInfo(int index)
