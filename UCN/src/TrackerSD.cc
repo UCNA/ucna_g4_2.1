@@ -64,18 +64,6 @@ void TrackerSD::Initialize(G4HCofThisEvent* hce)
 // In EventAction, loop over and sum all values.
 G4bool TrackerSD::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 {
-/*
-  G4double edepStep = aStep -> GetTotalEnergyDeposit();
-
-  if(edepStep == 0.) return false;	// get out if in our SD, no energy is deposited
-
-  // access first entry of fHitsCollection since that is the track-by-track tracker
-  TrackerHit* firstHit = (*fHitsCollection)[0];
-
-  // Accumulate values in TrackerHit objects now.
-  firstHit -> Add(edepStep);
-*/
-  // BELOW IS THE ACTUAL CODE FOR USING TRACKER SD AND HITS FOR ACCUMULATION.
   G4Track* aTrack = aStep -> GetTrack();
   G4String creatorProcessName = "";
   const G4VProcess* creatorProcess = aTrack -> GetCreatorProcess();
@@ -141,8 +129,11 @@ G4bool TrackerSD::ProcessHits(G4Step* aStep,G4TouchableHistory*)
   else
     edepQuenched = edep*QuenchFactor(myTrack -> second -> fOriginEnergy);
 
-  G4ThreeVector localPos = preStep -> GetTouchableHandle() -> GetHistory() -> GetTopTransform().TransformPoint(prePos);
-  myTrack -> second -> AddEdep(edep, localPos);
+  // weird thing where M.Mendenhall recorded local position, in analyzer should have global
+//  G4ThreeVector localPos = preStep -> GetTouchableHandle() -> GetHistory() -> GetTopTransform().TransformPoint(prePos);
+  G4ThreeVector globalPos = preStep -> GetPosition();
+//  myTrack -> second -> AddEdep(edep, localPos);
+  myTrack -> second -> AddEdep(edep, globalPos);
   myTrack -> second -> AddEdepQuenched(edepQuenched);
   myTrack -> second -> SetExitMomentum(postStep -> GetMomentum());
 
