@@ -27,7 +27,8 @@ int main(int argc,char** argv)
     ui = new G4UIExecutive(argc, argv);
   }
 
-  G4int seed = time(NULL);
+  long long seed = time(NULL);
+  G4cout << "Value of seed " << seed << G4endl;
   G4Random::setTheEngine(new CLHEP::RanecuEngine);	// Choose the Random engine
   G4Random::setTheSeed(seed);
 
