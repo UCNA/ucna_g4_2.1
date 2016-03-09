@@ -74,9 +74,10 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
 					//	-1 = default value in code
 					//	+1 = Auger electron, ...
     G4int iNbCoincidence;		// number of coincidence particles we'll produce
+    G4int iMaxNbCoin;
     G4bool bCoincidenceWasFired;	// keeps track of the ordering of Set_113Sn vs SavePrimPtclInfo
 
-    G4double fSourceRadius;		// spread radius for source droplets
+    G4double fSourceRadius; // spread radius for source droplets
     G4ThreeVector fPosOffset;		// base positioning offset
     event fEvtsArray[2000000];		// size has to be number of lines in input file
 
@@ -88,6 +89,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     void SavePrimPtclInfo2(int eventID);	// used for particles generated in the GEANT4 sim
 
     void Set_113SnSource();
+    void Set_139CeSource();
 
     // UI command variables for messenger class input/output files
     G4UIdirectory* uiGenDir;	// UI directory for primaryGeneratorAction related commands
