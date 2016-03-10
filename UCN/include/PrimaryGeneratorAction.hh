@@ -70,7 +70,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
 
     bool bIsLoaded;			// check if we've already loaded the input ptcl file
 
-    G4int iCoincidencePtcl;		// flag to see if we want to produce a coincidence ptcl
+    vector <G4double> dCoincidenceEnergies;
+    vector <G4int> iCoincidencePtcl;		// flag to see if we want to produce a coincidence ptcl
 					//	-1 = default value in code
 					//	+1 = Auger electron, ...
     G4int iNbCoincidence;		// number of coincidence particles we'll produce
@@ -88,8 +89,9 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     void SavePrimPtclInfo(int index);
     void SavePrimPtclInfo2(int eventID);	// used for particles generated in the GEANT4 sim
 
-    void Set_113SnSource();
+//    void Set_113SnSource();
     void Set_139CeSource();
+    void Set_207BiSource();
 
     // UI command variables for messenger class input/output files
     G4UIdirectory* uiGenDir;	// UI directory for primaryGeneratorAction related commands
