@@ -89,7 +89,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     void SavePrimPtclInfo(int index);
     void SavePrimPtclInfo2(int eventID);	// used for particles generated in the GEANT4 sim
 
-//    void Set_113SnSource();
+    void Set_113SnSource();
     void Set_139CeSource();
     void Set_207BiSource();
 

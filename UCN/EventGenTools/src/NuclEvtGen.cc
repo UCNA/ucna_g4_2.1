@@ -265,6 +265,44 @@ double BetaDecayTrans::evalBeta(double* x, double*) { return BSG.decayProb(x[0])
 
 //-----------------------------------------
 
+FierzDecayTrans::FierzDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden):
+    BetaDecayTrans(f, t, pstrn, forbidden) 
+{       
+	//BSG.forbidden = forbidden;
+	//betaTF1.SetNpx(1000);
+	//betaTF1.SetRange(0,from.E-to.E);
+	//if(from.jpi==to.jpi) { BSG.M2_F = 1; BSG.M2_GT = 0; }
+	//else { BSG.M2_GT = 1; BSG.M2_F = 0; } // TODO not strictly true; need more general mechanism to fix
+	//betaQuantiles = new TF1_Quantiles(betaTF1);
+    
+    /// spectral number which is -1 for fierz instead of normal beta decay at zero.
+    BSG.SI = -1;
+}
+
+//BetaDecayTrans::~BetaDecayTrans() {
+//	delete betaQuantiles;
+//}
+
+void FierzDecayTrans::display(bool verbose) const {
+	printf("Fierz(%.1f) ",from.E-to.E); // TODO Add spectral index, F, GT information?
+	BetaDecayTrans::display(verbose);
+}
+
+/*
+void BetaDecayTrans::run(std::vector<NucDecayEvent>& v, double* rnd) {
+	NucDecayEvent evt;
+	evt.d = positron?D_POSITRON:D_ELECTRON;
+	evt.randp(rnd);
+	if(rnd) evt.E = betaQuantiles->eval(rnd[2]);
+	else evt.E = betaTF1.GetRandom();
+	v.push_back(evt);
+}
+*/
+
+//double BetaDecayTrans::evalBeta(double* x, double*) { return BSG.decayProb(x[0]); }
+
+//-----------------------------------------
+
 void ECapture::run(std::vector<NucDecayEvent>&, double*) {
 	isKCapt = gRandom->Uniform(0,1) < toAtom->IMissing;
 }
@@ -327,6 +365,21 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 	std::vector<Stringmap> betatrans = Q.retrieve("beta");
 	for(std::vector<Stringmap>::iterator it = betatrans.begin(); it != betatrans.end(); it++) {
 		BetaDecayTrans* BD = new BetaDecayTrans(levels[levIndex(it->getDefault("from",""))],
+										levels[levIndex(it->getDefault("to",""))],
+										it->getDefault("positron",0),
+										it->getDefault("forbidden",0));
+		BD->Itotal = it->getDefault("I",0)/100.0;
+		if(it->count("M2_F") || it->count("M2_GT")) {
+			BD->BSG.M2_F = it->getDefault("M2_F",0);
+			BD->BSG.M2_GT = it->getDefault("M2_GT",0);
+		}
+		addTransition(BD);
+	}
+	
+	// set up Fierz decays (like beta decay, but with scalar - tensor coupling)
+	std::vector<Stringmap> fierztrans = Q.retrieve("fierz");
+	for(std::vector<Stringmap>::iterator it = fierztrans.begin(); it != fierztrans.end(); it++) {
+		FierzDecayTrans* BD = new FierzDecayTrans(levels[levIndex(it->getDefault("from",""))],
 										levels[levIndex(it->getDefault("to",""))],
 										it->getDefault("positron",0),
 										it->getDefault("forbidden",0));

@@ -29,8 +29,16 @@ const double gamma_euler = 0.577215;			///< Euler's constant
 
 //-------------- Spectrum corrections ------------------
 
-/// beta decay phase space without corrections
+/// beta decay phase space with corrections
 inline double plainPhaseSpace(double W, double W0=beta_W0) { return (1.<W && W<W0)?sqrt(W*W-1)*W*(W0-W)*(W0-W):0; }
+
+/// beta decay with spectral index for BSM decays like Fierz terms (1 for V,A and 0 for S,T)
+inline double spectralIndexPhaseSpace(double W, double W0=beta_W0, int SI=1) { 
+    double prob = (1.<W && W<W0)?sqrt(W*W-1)*(W0-W)*(W0-W):0;
+    for (int si = 0; si < SI; si++)
+        prob *= W;
+    return prob;
+}
 /// beta for particle with given KE
 inline double beta(double KE, double m = m_e) { return sqrt(KE*KE+2*m*KE)/(m+KE); }
 
@@ -95,13 +103,14 @@ public:
 	
 	double A;				///< number of nucleons
 	double Z;				///< number of protons
-	double EP;				///< endpoint kinetic energy, keV
+	double EP;				///< endpoint kinetic energy, kee
 	double W0;				///< endpoint total energy, m_e*c^2
 	double R;				///< effective nuclear radius
 	double M0;				///< nuclear mass, m_e*c^2
 	unsigned int forbidden;	///< "forbidden" level of decay
 	double M2_F;			///< |M_F|^2 Fermi decay matrix element
 	double M2_GT;			///< |M_GT|^2 Gamov-Teller decay matrix element
+    int SI;                 ///< Spectral index for BSM spectral shapes including Fierz terms (1 for V,A and 0 for S,T)
 };
 
 

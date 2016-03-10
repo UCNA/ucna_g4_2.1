@@ -278,7 +278,7 @@ double SpenceL(double x, unsigned int N=20) {
 }
 
 double Sirlin_g_a2pi(double KE,double KE0,double m) {
-	if(KE<=0 || KE>=KE0)
+	if(KE<=0 or KE>=KE0)
 		return 0;
 	double b = beta(KE,m);
 	double E = KE+m;
@@ -292,7 +292,7 @@ double Sirlin_g_a2pi(double KE,double KE0,double m) {
 }
 
 double shann_h_a2pi(double KE, double KE0, double m) {
-	if(KE<=0 || KE>=KE0)
+	if(KE<=0 or KE>=KE0)
 		return 0;
 	double b = beta(KE,m);
 	double E = KE+m;
@@ -305,7 +305,7 @@ double shann_h_a2pi(double KE, double KE0, double m) {
 }
 
 double Wilkinson_g_a2pi(double W, double W0, double M) {
-	if(W>=W0 || W<=1)
+	if(W>=W0 or W<=1)
 		return 0;
 	double b = sqrt(W*W-1)/W;
 	double athb = atanh(b);
@@ -329,9 +329,16 @@ double neutronSpectrumCorrectionFactor(double KE) {
 	return c;
 }
 
+/// beta decay with standard corrected spectrum 
 double neutronCorrectedBetaSpectrum(double KE) {
 	double W = (KE+m_e)/m_e;
 	return plainPhaseSpace(W,beta_W0)*neutronSpectrumCorrectionFactor(KE);
+}
+
+/// beta decay with spectral index for BSM decays like Fierz terms (1 for V,A and 0 for S,T)
+double neutronCorrectedSpectralBetaSpectrum(double KE, int SI) {
+	double W = (KE+m_e)/m_e;
+	return spectralIndexPhaseSpace(W,beta_W0,SI)*neutronSpectrumCorrectionFactor(KE);
 }
 
 double Davidson_C1T(double W, double W0, double Z, double R) {
@@ -391,7 +398,7 @@ double Behrens_Cs137_C(double W, double W0) {
 
 BetaSpectrumGenerator::BetaSpectrumGenerator(double a, double z, double ep): A(a), Z(z), EP(ep),
 W0((EP+m_e)/m_e), R(pow(A,1./3.)*neutron_R0), M0(fabs(Z)*proton_M0+(A-fabs(Z))*neutron_M0),
-forbidden(0), M2_F(0), M2_GT(1) { }
+forbidden(0), M2_F(0), M2_GT(1), SI(0) { }
 
 double BetaSpectrumGenerator::spectrumCorrectionFactor(double W) const {
 	double c = WilkinsonF0(Z,W,R);			// Fermi function Coulomb
@@ -421,15 +428,15 @@ double BetaSpectrumGenerator::spectrumCorrectionFactor(double W) const {
 
 double BetaSpectrumGenerator::decayProb(double KE) const {
 	double W = (KE+m_e)/m_e;
-	if(W<1 || W>W0) return 0;
-	return plainPhaseSpace(W,W0)*spectrumCorrectionFactor(W);
+	if(W<1 or W>W0) return 0;
+	return spectralIndexPhaseSpace(W,W0,SI)*spectrumCorrectionFactor(W);
 }
 
 //-----------------------------------------------------//
 
 
 double shann_h_minus_g_a2pi(double W, double W0) {
-	if(W>=W0 || W<=1)
+	if(W>=W0 or W<=1)
 		return 0;
 	double b = sqrt(W*W-1)/W;
 	double athb = atanh(b);

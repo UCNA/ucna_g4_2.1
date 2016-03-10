@@ -226,6 +226,32 @@ protected:
 	TF1_Quantiles* betaQuantiles;	///< inverse CDF of beta spectrum shape for random point selection
 };
 
+/// beta decay transitions
+class FierzDecayTrans: public BetaDecayTrans {
+public:
+	/// constructor
+	FierzDecayTrans(NucLevel& f, NucLevel& t, bool pstrn = false, unsigned int forbidden = 0);
+	/// destructor
+	//~FierzDecayTrans();
+	// select transition outcome
+	//virtual void run(std::vector<NucDecayEvent>& v, double* rnd = NULL);
+	/// display transition line info
+	virtual void display(bool verbose = false) const;
+	
+	// return number of continuous degrees of freedom needed to specify transition
+	//virtual unsigned int getNDF() const { return 3; }
+	
+	//bool positron;		///< whether this is positron decay
+	//BetaSpectrumGenerator BSG;	///< spectrum shape generator
+
+protected:
+	// evaluate beta spectrum probability
+	//double evalBeta(double* x, double*);
+	//TF1 betaTF1;					///< TF1 for beta spectrum shape
+	//TF1_Quantiles* betaQuantiles;	///< inverse CDF of beta spectrum shape for random point selection
+};
+
+
 /// Decay system
 class NucDecaySystem {
 public:

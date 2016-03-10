@@ -104,7 +104,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 //    Set_139CeSource();
     Set_207BiSource();
 
-    G4cout << "Completed setting 207Bi source. " << G4endl;
+    G4cout << "Completed setting source." << G4endl;
 
     if(bCoincidenceWasFired == false)
     {
@@ -176,6 +176,10 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       else if(iNbCoincidence == iMaxNbCoin - 3)
       {
         SavePrimPtclInfo2(evtID - 4);
+      }
+      else if(iNbCoincidence == iMaxNbCoin - 4)
+      {
+	SavePrimPtclInfo2(evtID - 5);
       }
       // since we've now accounted for one coincidence, lower the number of coincidences in the counter
       iNbCoincidence = iNbCoincidence - 1;
@@ -364,11 +368,11 @@ void PrimaryGeneratorAction::SavePrimPtclInfo(int index)
 
 void PrimaryGeneratorAction::Set_207BiSource()
 {
-  G4cout << "Start of 207Bi source. iNbCoincidence = " << iNbCoincidence << G4endl;
-
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
   G4ParticleDefinition* particle;
+
+  G4cout << "Starting to set source. Size of iCoincidencePtcl is " << iCoincidencePtcl.size() << G4endl;
 
   if(iNbCoincidence > 0)
   {
@@ -378,7 +382,6 @@ void PrimaryGeneratorAction::Set_207BiSource()
       particle = particleTable -> FindParticle(particleName="e-");
       dCoincidenceEnergies.pop_back();
       iCoincidencePtcl.pop_back();
-      G4cout << "Firing COINCIDENCE electron." << G4endl;
     }
     else if(iCoincidencePtcl[iCoincidencePtcl.size() - 1] == 2)
     {
@@ -386,8 +389,6 @@ void PrimaryGeneratorAction::Set_207BiSource()
       particle = particleTable -> FindParticle(particleName="gamma");
       dCoincidenceEnergies.pop_back();
       iCoincidencePtcl.pop_back();
-      G4cout << "Firing COINCIDENCE gamma." << G4endl;
-      G4cout << "size of coincidence ptcl: " << iCoincidencePtcl.size() << G4endl;
     }
     bCoincidenceWasFired = true;        // sets the flag stating that we created a ptcl
                                         // that is intended to be recorded in coincidence
@@ -397,12 +398,14 @@ void PrimaryGeneratorAction::Set_207BiSource()
     bCoincidenceWasFired = false;       // sets the flag stating we are using a coincidence for this event to false
                                         // meaning this is a ptcl generated that is not supposed to be a coincidence.
 
-    G4double dr1 = G4UniformRand()*100;	// gives us a range from (0, 100)
-
-    G4cout << "Coincidence NOT fired. dr1 = " << dr1 << G4endl;
-
+    G4double dr1 = G4UniformRand()*99.7886307;	// gives us a range from (0, 99.7886307)
+						// total prob of headed to 3 branches for 207Bi
+						// The upper 2 are calculated from nndc data, the 1st excited
+						// is taken from the less precise decay scheme on nndc
     // headed to the stable branch (this entire thing is 1 cascade of coincidences)
-    if((dr1 >= 0) && (dr1 <= 100 /*83.86*/))
+    G4cout << "Firing a beginning paticle. dr1 = " << dr1 << G4endl;
+
+    if((dr1 >= 0) && (dr1 <= 83.86))
     {
       G4double dr5 = G4UniformRand()*100;
       if((dr5 >= 0) && (dr5 <= 0 /*1.3796*/))	// fire an Auger without any other coincidences (since stable level)
@@ -413,7 +416,8 @@ void PrimaryGeneratorAction::Set_207BiSource()
       else	// singular Auger was not fired
       {	// so now we're in the 3rd excited level which is stable
 
-        if((dr1 >= 0) && (dr1 <= 100 /*74.5*/))	// if gamma, then we do the entire decay from 1st excited
+	// if gamma, then the remainder of the code is the prob. split of decay from 1st -> GS
+        if((dr1 >= 0) && (dr1 <= 74.5))	// if gamma, then we do the entire decay from 1st excited
 	{
 	  fParticleGun -> SetParticleEnergy(1063.656*keV);
 	  particle = particleTable->FindParticle(particleName="gamma");
@@ -460,17 +464,395 @@ void PrimaryGeneratorAction::Set_207BiSource()
               iNbCoincidence++;
               iMaxNbCoin++;
             }
+	  }
+	}
+	// if CE, we do the exact same thing. Except we also need to check for an Auger coincidence beforehand.
+	else if((dr1 > 74.5) && (dr1 <= 83.86))
+	{
+	  // CE is taking us from 3rd excited to 1st excited. Check for Auger
+          G4double dr17 = G4UniformRand()*100;
+          if((dr17 >= 0) && (dr17 <= 1.3796))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(56.7*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
 
+	  // regardless of whether an Auger was fired or not, now sample the CE that do 3->1
+	  if((dr1 > 74.5) && (dr1 <= 74.94))
+	  {	// this is the first particle that decays from this branch.
+		// So it needs to be set explicitly and not as a coincidence ptcl
+	    fParticleGun -> SetParticleEnergy(1059.805*keV);
+	    particle = particleTable -> FindParticle(particleName="e-");
+	  }
+	  else if((dr1 > 74.94) && (dr1 <= 76.78))
+	  {
+	    fParticleGun -> SetParticleEnergy(1047.795*keV);
+	    particle = particleTable -> FindParticle(particleName="e-");
+	  }
+	  else if((dr1 > 76.78) && (dr1 <= 83.86))
+	  {
+	    fParticleGun -> SetParticleEnergy(975.651*keV);
+	    particle = particleTable -> FindParticle(particleName="e-");
+	  }
+	  // Now we are in 1st excited via CE decay from 3rd excited, with possibly an additional Auger released.
+	  // What remains is to put the entire 1st -> GS as a series of coincidence ptcls i.e. a cascade
+	  G4double dr18 = G4UniformRand()*99.84;	// percentage of decays from 1st excited to GS
+	  if((dr18 >= 0) && (dr18 <= 97.75))
+	  {
+	    iCoincidencePtcl.push_back(2);
+	    dCoincidenceEnergies.push_back(569.698*keV);
+     	    iNbCoincidence++;
+     	    iMaxNbCoin++;
+	  }
+	  else if((dr18 > 97.75) && (dr18 <= 99.84))
+	  {
+	    // i.e. if we are firing a CE, from 1st to GS, check if we get an Auger
+	    G4double dr19 = G4UniformRand()*100;
+	    if((dr19 >= 0) && (dr19 <= 1.3796)) // sets an Auger in coincidence with init gamma ray + second CE
+	    {
+              iCoincidencePtcl.push_back(1);
+              dCoincidenceEnergies.push_back(56.7*keV);
+              iNbCoincidence++;
+              iMaxNbCoin++;
+	    }
 
+	    // since we are firing a CE, from 1st to GS, check the spread on energies
+	    if((dr18 > 97.75) && (dr18 <= 99.287))
+            {
+              iCoincidencePtcl.push_back(1);
+              dCoincidenceEnergies.push_back(481.6935*keV);
+              iNbCoincidence++;
+              iMaxNbCoin++;
+            }
+            else if((dr18 > 99.287) && (dr18 <= 99.729))
+            {
+              iCoincidencePtcl.push_back(1);
+              dCoincidenceEnergies.push_back(553.8372*keV);
+              iNbCoincidence++;
+              iMaxNbCoin++;
+            }
+            else if((dr18 > 99.729) && (dr18 <= 99.84))
+            {
+              iCoincidencePtcl.push_back(1);
+              dCoincidenceEnergies.push_back(565.8473*keV);
+              iNbCoincidence++;
+              iMaxNbCoin++;
+            }
+	  }
+	}
+      }
+    }
+    // headed to the upper branch
+    else if((dr1 > 83.86) && (dr1 <= 90.8886307))
+    {
+      // on the way to upper branch, check if we get an Auger electron
+      G4double dr8 = G4UniformRand()*100;
+      if((dr8 >= 0) && (dr8 <= 1.3796)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
+      {	// note this is added as a coincidence since we are guaranteed a ptcl in the decay down from 4th excited
+        iCoincidencePtcl.push_back(1);
+        dCoincidenceEnergies.push_back(56.7*keV);
+        iNbCoincidence++;
+        iMaxNbCoin++;
+      }
 
+      if((dr1 > 83.86) && (dr1 <= 90.73))
+      {	// gamma takes us from 4th excited to 1st excited
+        fParticleGun -> SetParticleEnergy(1770.228*keV);
+        particle = particleTable->FindParticle(particleName="gamma");
+
+	// so now we're in 1st excited, need to set a cascade of coincidences from 1st excited down to GS
+	G4double dr13 = G4UniformRand()*99.84;
+	if((dr13 >= 0) && (dr13 <= 97.75))
+	{	// if true, a gamma takes us to GS. So no Auger coincidence.
+	  iCoincidencePtcl.push_back(2);
+	  dCoincidenceEnergies.push_back(569.698*keV);
+	  iNbCoincidence++;
+	  iMaxNbCoin++;
+	}
+	else if((dr13 > 97.75) && (dr13 <= 99.84))
+	{
+	  G4double dr12 = G4UniformRand()*100;
+	  // since a CE drops us from 1st excited to GS, check for an Auger in coincidence
+	  if((dr12 >= 0) && (dr12 <= 1.3796))
+	  {
+	    iCoincidencePtcl.push_back(1);
+	    dCoincidenceEnergies.push_back(56.7*keV);
+	    iNbCoincidence++;
+	    iMaxNbCoin++;
+	  }
+
+	  // now, evaluate whether that CE was M, L or K shell (in that order)
+	  if((dr13 > 97.75) && (dr13 <= 97.861))
+	  {
+	    iCoincidencePtcl.push_back(1);
+	    dCoincidenceEnergies.push_back(565.8473*keV);
+	    iNbCoincidence++;
+	    iMaxNbCoin++;
+	  }
+	  else if((dr13 > 97.861) && (dr13 <= 98.303))
+	  {
+	    iCoincidencePtcl.push_back(1);
+	    dCoincidenceEnergies.push_back(553.8372*keV);
+	    iNbCoincidence++;
+	    iMaxNbCoin++;
+	  }
+	  else if((dr13 > 98.303) && (dr13 <= 99.84))
+	  {
+	    iCoincidencePtcl.push_back(1);
+	    dCoincidenceEnergies.push_back(481.6935);
+	    iNbCoincidence++;
+	    iMaxNbCoin++;
 	  }
 	}
 
+      }
+      else if((dr1 > 90.73) && (dr1 <= 90.7572))
+      {	// if we fire a CE in the decay from 4th excited to 1st excited, check if we get an Auger in coincidence
+        G4double dr9 = G4UniformRand()*100;
+        if((dr9 >= 0) && (dr9 <= 1.3796)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
+        {
+          iCoincidencePtcl.push_back(1);
+          dCoincidenceEnergies.push_back(56.7*keV);
+          iNbCoincidence++;
+          iMaxNbCoin++;
+        }
+	// these are the CE we could fire to drop from 4th to 1st. L and K shells
+        if((dr1 > 90.73) && (dr1 <= 90.7334))
+        {
+          fParticleGun -> SetParticleEnergy(1754.367*keV);
+	  particle = particleTable -> FindParticle(particleName="e-");
+        }
+	else if((dr1 > 90.7334) && (dr1 <= 90.7572))
+	{
+	  fParticleGun -> SetParticleEnergy(1682.224*keV);
+	  particle = particleTable -> FindParticle(particleName="e-");
+	}
 
+        // so now we're in 1st excited, need to set a cascade of coincidences from 1st excited down to GS
+        G4double dr11 = G4UniformRand()*99.84;
+        if((dr11 >= 0) && (dr11 <= 97.75))
+        {       // if true, a gamma takes us to GS. So no Auger coincidence.
+          iCoincidencePtcl.push_back(2);
+          dCoincidenceEnergies.push_back(569.698*keV);
+          iNbCoincidence++;
+          iMaxNbCoin++;
+        }
+        else if((dr11 > 97.75) && (dr11 <= 99.84))
+        {
+          G4double dr12 = G4UniformRand()*100;
+          // since a CE drops us from 1st excited to GS, check for an Auger in coincidence
+          if((dr12 >= 0) && (dr12 <= 1.3796))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(56.7*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+
+          // now, evaluate whether that CE was M, L or K shell (in that order)
+          if((dr11 > 97.75) && (dr11 <= 97.861))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(565.8473*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+          else if((dr11 > 97.861) && (dr11 <= 98.303))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(553.8372*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+          else if((dr11 > 98.303) && (dr11 <= 99.84))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(481.6935);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+        }
+      }
+      // this is 4th excited to 2nd excited. We'll ignore the 2->1 excited decay since the probability is so small.
+      // So we'll only code the 2nd to GS decay (about 0.13% of decays).
+      else if((dr1 > 90.7572) && (dr1 <= 90.8882))
+      {	// gamma is taking us from 4th excited to 2nd excited state
+	fParticleGun -> SetParticleEnergy(1442.2*keV);
+	particle = particleTable -> FindParticle(particleName="e-");
+
+	// now we're in 2nd excited. A gamma or a CE drops us to ground state (GS)
+	G4double dr14 = G4UniformRand()*0.130962;	// total intensities sum for 2nd->GS decays
+	if((dr14 >= 0) && (dr14 <= 0.128))
+	{	// fire a gamma in coincidence with w/e ptcl got us to 2nd excited state
+          iCoincidencePtcl.push_back(2);
+          dCoincidenceEnergies.push_back(897.77*keV);
+          iNbCoincidence++;
+          iMaxNbCoin++;
+	}
+	else if((dr14 > 0.128) && (dr14 <= 0.130962))
+	{	// this means a CE is taking us to GS. So check for Augers
+	  G4double dr15 = G4UniformRand()*100;
+	  if((dr15 >= 0) && (dr15 <= 1.3796))
+	  {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(56.7*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+	  }
+	  // regardless of whether an Auger was produced or not (in coincidence), check which CE
+	  // will drop us to GS, which needs to be fired in coincidence as well
+	  if((dr14 > 0.128) && (dr14 <= 0.128095))
+	  {
+	    iCoincidencePtcl.push_back(1);
+	    dCoincidenceEnergies.push_back(893.92*keV);
+	    iNbCoincidence++;
+	    iMaxNbCoin++;
+	  }
+	  else if((dr14 > 0.128095) && (dr14 <= 0.128502))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(881.91*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+          else if((dr14 > 0.128502) && (dr14 <= 0.130962))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(809.77*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+	}
+      }
+      else if((dr1 > 90.8882) && (dr1 <= 90.8886307))
+      {	// if we fire a CE in the decay from 4th excited to 2nd excited, check if we get an Auger in coincidence
+        G4double dr10 = G4UniformRand()*100;
+        if((dr10 >= 0) && (dr10 <= 1.3796)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
+        {
+          iCoincidencePtcl.push_back(1);
+          dCoincidenceEnergies.push_back(56.7*keV);
+          iNbCoincidence++;
+          iMaxNbCoin++;
+        }
+	// these are the CE we could fire to drop from 4th to 2nd. M, L, K shells
+	if((dr1 > 90.8882) && (dr1 <= 90.8882144))
+	{
+	  fParticleGun -> SetParticleEnergy(1438.35*keV);
+	  particle = particleTable -> FindParticle(particleName="e-");
+	}
+	else if((dr1 > 90.8882144) && (dr1 <= 90.8882757))
+	{
+	  fParticleGun -> SetParticleEnergy(1426.34*keV);
+	  particle = particleTable -> FindParticle(particleName="e-");
+	}
+	else if((dr1 > 90.8882757) && (dr1 <= 90.8886307))
+	{
+	  fParticleGun -> SetParticleEnergy(1354.20*keV);
+	  particle = particleTable -> FindParticle(particleName="e-");
+	}
+	// At this point, in this branch, a CE has taken us from 4th to 2nd and (possibly) and Auger fired in coincidence.
+        // now we're in 2nd excited. A gamma or a CE drops us to ground state (GS)
+        G4double dr14 = G4UniformRand()*0.130962;       // total intensities sum for 2nd->GS decays
+        if((dr14 >= 0) && (dr14 <= 0.128))
+        {       // fire a gamma in coincidence with w/e ptcl got us to 2nd excited state
+          iCoincidencePtcl.push_back(2);
+          dCoincidenceEnergies.push_back(897.77*keV);
+          iNbCoincidence++;
+          iMaxNbCoin++;
+        }
+        else if((dr14 > 0.128) && (dr14 <= 0.130962))
+        {       // this means a CE is taking us to GS. So check for Augers
+          G4double dr15 = G4UniformRand()*100;
+          if((dr15 >= 0) && (dr15 <= 1.3796))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(56.7*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+          // regardless of whether an Auger was produced or not (in coincidence), check which CE
+          // will drop us to GS, which needs to be fired in coincidence as well
+          if((dr14 > 0.128) && (dr14 <= 0.128095))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(893.92*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+          else if((dr14 > 0.128095) && (dr14 <= 0.128502))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(881.91*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+          else if((dr14 > 0.128502) && (dr14 <= 0.130962))
+          {
+            iCoincidencePtcl.push_back(1);
+            dCoincidenceEnergies.push_back(809.77*keV);
+            iNbCoincidence++;
+            iMaxNbCoin++;
+          }
+        }
+      }
+    }
+    // going to lowest branch (1st excited state).
+    // this branching ratio is taken from the less precise decay scheme since I didn't want to calculate it.
+    // The percentages will be the fraction of decays given that you are in 1st excited (since all decays end up there)
+    else if((dr1 > 90.8886307) && (dr1 <= 99.7886307))
+    {
+      // since this neutron capture is decaying to 1st excited, check for an Auger
+      G4double dr20 = G4UniformRand()*100;
+      if((dr20 >= 0) && (dr20 <= 1.3796))
+      {
+        iCoincidencePtcl.push_back(1);
+        dCoincidenceEnergies.push_back(56.7*keV);
+        iNbCoincidence++;
+        iMaxNbCoin++;
       }
 
+      // if we get an Auger, add it in coincidence to the coincidence stack
+      // but regardless, then process the decay down to GS
+      G4double percent1stToGS = G4UniformRand()*99.84;	// percentages taken from nndc for 1st -> GS
+      if((percent1stToGS >= 0) && (percent1stToGS <= 97.75))
+      {
+	fParticleGun -> SetParticleEnergy(569.698*keV);
+	particle = particleTable->FindParticle(particleName = "gamma");
+      }
+      else if((percent1stToGS > 97.75) && (percent1stToGS < 99.84))
+      {	// decay 1st to GS via CE. Check for an Auger.
+        G4double dr21 = G4UniformRand()*100;
+        if((dr21 >= 0) && (dr21 <= 1.3796))
+        {
+          iCoincidencePtcl.push_back(1);
+          dCoincidenceEnergies.push_back(56.7*keV);
+          iNbCoincidence++;
+          iMaxNbCoin++;
+        }
+
+
+	// then, process the CE from 1st to GS
+        if((percent1stToGS > 97.75) && (percent1stToGS <= 97.861))
+        {
+	  fParticleGun -> SetParticleEnergy(565.8473*keV);
+	  particle = particleTable->FindParticle(particleName = "e-");
+        }
+        else if((percent1stToGS > 97.861) && (percent1stToGS <= 98.303))
+        {
+	  fParticleGun -> SetParticleEnergy(553.8372*keV);
+	  particle = particleTable->FindParticle(particleName = "e-");
+        }
+        else if((percent1stToGS > 98.303) && (percent1stToGS <= 99.84))
+        {
+	  fParticleGun -> SetParticleEnergy(481.6935*keV);
+	  particle = particleTable->FindParticle(particleName = "e-");
+        }
+      }
     }
   }
+
   fParticleGun->SetParticleDefinition(particle);
   fParticleGun->SetParticleTime(0.0*ns);        // Michael's has this line. Idk why.
 
@@ -622,7 +1004,7 @@ void PrimaryGeneratorAction::Set_139CeSource()
   fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
 }
 
-/*
+
 void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional arguments since we set the particle gun.
 {
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
@@ -633,10 +1015,12 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
 
   if(iNbCoincidence > 0)
   {
-    if(iCoincidencePtcl == 1)		// create a K shell Auger electron for 113Sn
+    if(iCoincidencePtcl[iCoincidencePtcl.size() - 1] == 1)		// create a K shell Auger electron for 113Sn
     {
-      fParticleGun -> SetParticleEnergy(20.1*keV);
+      fParticleGun -> SetParticleEnergy(dCoincidenceEnergies[dCoincidenceEnergies.size() - 1]);
       particle = particleTable -> FindParticle(particleName="e-");
+      dCoincidenceEnergies.pop_back();
+      iCoincidencePtcl.pop_back();
     }
     // technically, here you would put other options for other coincidences.
     // for 113Sn, there is no other coincidence that we care about.
@@ -659,8 +1043,10 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
       double AugerPercent = G4UniformRand()*100;	// check whether the CE also comes with an Auger
       if((AugerPercent >= 0) && (AugerPercent <= 11.8056))
       {
-        iCoincidencePtcl = 1;	// sets the flag to produce an Auger
+        iCoincidencePtcl.push_back(1);	// sets the flag to produce an Auger
+        dCoincidenceEnergies.push_back(20.1*keV);
         iNbCoincidence++;	// increments our coincidence counter so next event, we produce an Auger
+        iMaxNbCoin++;
       }
 
       // whether or not the Auger flag checks out, we produce all the CE down here.
@@ -725,9 +1111,7 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
         particle = particleTable -> FindParticle(particleName="e-");
       }
     }
-
   }
-
 
   fParticleGun->SetParticleDefinition(particle);
   fParticleGun->SetParticleTime(0.0*ns);        // Michael's has this line. Idk why.
@@ -767,7 +1151,7 @@ void PrimaryGeneratorAction::Set_113SnSource()	// don't need additional argument
   fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
 
 }
-*/
+
 /*  G4ThreeVector newUz;        // fires isotropic cone where cone axis can be rotated.
   G4double theta, phi, apex;
 

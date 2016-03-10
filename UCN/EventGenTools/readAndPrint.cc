@@ -32,8 +32,8 @@
 #include	 <TChain.h>
 using		 namespace std;
 
-#define		INPUT_DATA_FILE			"Sn113_o_p/Evts_0.root"
-#define		OUTPUT_FILE			"Sn113_initPtclFile_10K.txt"
+#define		INPUT_DATA_FILE			"n_fierz_f_p/Evts_0.root"
+#define		OUTPUT_FILE			"fierz_beta_2mill.txt"
 
 //required later for plot_program
 TApplication plot_program("FADC_readin",0,0,0,0);
