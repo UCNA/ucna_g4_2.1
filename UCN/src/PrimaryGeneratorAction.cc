@@ -23,7 +23,7 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
   fMyDetector(myDC),
   fSourceRadius(3.*mm),	// this is default set. If you aren't using DiskRandom, don't care.
   fPosOffset(G4ThreeVector(0,0,0)),	// base positioning offset. Is non-zero only if main Decay Trap is offset (it is not)
-  bIsLoaded(false), bUseExternal(false),
+  bIsLoaded(false),
   iNbCoincidence(0), iMaxNbCoin(0),
   bCoincidenceWasFired(false)
 {
@@ -41,6 +41,11 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
   uiOutputFileCmd -> SetGuidance("Set the output file name of the primaries.");
   uiOutputFileCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
   sOutputFileName = "none.txt";
+
+  uiParticleGenTypeCmd = new G4UIcmdWithAString("/particleGun/ptclType", this);
+  uiParticleGenTypeCmd -> SetGuidance("Set the particle type of the primaries.");
+  uiParticleGenTypeCmd -> AvailableForStates(G4State_PreInit, G4State_Idle);
+  sPtclType = "Sn113";	// default to firing and recording tin. Can change to anything
 
   //----- Above is messenger class
 
@@ -67,6 +72,11 @@ void PrimaryGeneratorAction::SetNewValue(G4UIcommand* command, G4String newValue
     sOutputFileName = G4String(newValue);
     G4cout << "Setting output primary particles information file to " << sOutputFileName << G4endl;
   }
+  else if(command == uiParticleGenTypeCmd)
+  {
+    sPtclType = G4String(newValue);
+    G4cout << "Firing particles of type " << sPtclType << G4endl;
+  }
   else
     G4cout << "COMMAND DOES NOT MATCH PRIMARY GENERATOR ACTION OPTIONS." << G4endl;
 }
@@ -76,7 +86,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // use GEANT4 event id to track which part of fEvtsArray we will use for generated event
   int evtID = anEvent -> GetEventID();
 
-  if(bUseExternal == true)
+  if(sPtclType == "external")
   {
     if(evtID == 0)
     {
@@ -91,24 +101,22 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     // Will need to check this. For now it is the same within float to double rounding.
     SavePrimPtclInfo(evtID);
   }
-  else if(bUseExternal == false)
+  else if(sPtclType == "Sn113")
   {
     // note this will look different than loading the external kinematics file
     // because we need to be able to account for Auger and other coincidence particles
     if(evtID == 0)
     {
-      G4cout << "Using GEANT4 particle generation to create initial particles..." << G4endl;
+      G4cout << "Using GEANT4 particle generation to create initial Sn113 particles..." << G4endl;
     }
 
-//    Set_113SnSource();	// processes all decays of 113Sn that we are interested in
-//    Set_139CeSource();
-    Set_207BiSource();
+    Set_113SnSource();	// processes all decays of 113Sn that we are interested in
 
+    // Sn113 print out.
     if(bCoincidenceWasFired == false)
     {
       SavePrimPtclInfo2(evtID);
     }
-/*    // 113Sn source print-out
     else if(bCoincidenceWasFired == true)
     {
       // save primary ptcl info as same event number so we can add up later
@@ -116,46 +124,74 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       // since we've now accounted for one coincidence, lower the number of coincidences in the counter
       iNbCoincidence = iNbCoincidence - 1;
       if(iNbCoincidence < 0)
-	G4cout << "RUN-TIME ERROR IN CODE. iNbCoincidence went below 0. Makes no sense." << G4endl;
-
+      {
+        G4cout << "RUN-TIME ERROR IN CODE. iNbCoincidence went below 0. Makes no sense." << G4endl;
+      }
       if(iNbCoincidence == 0)
       {
-        iCoincidencePtcl = -1;		// if we have no more coincidences, reset the ptcl flag to -1
+        iCoincidencePtcl.clear();
+        iMaxNbCoin = 0;
       }
-    } */
+    }
+  }
+  else if(sPtclType == "Ce139")
+  {
+    if(evtID == 0)
+    {
+      G4cout << "Using GEANT4 particle generation to create initial Ce139 particles..." << G4endl;
+    }
 
-    // 139Ce print out
+    Set_139CeSource();
+    // Ce139 print out
+    if(bCoincidenceWasFired == false)
+    {
+      SavePrimPtclInfo2(evtID);
+    }
     // This is fine. At each event, iNbCoincidence and iMaxNbCoin increment to same number.
     // Hence it can't overlap with iNbCoincidence == 0 unless you have already reset iMaxNbCoin to 0
     // which means as you go through again, it'll switch to to generating a new ptcl, not firing another coincidence
-/*    else if(bCoincidenceWasFired == true)
+    else if(bCoincidenceWasFired == true)
     {
       // check if we've fired any coincidences (and if we need to)
       if(iNbCoincidence == iMaxNbCoin)
       {
-	SavePrimPtclInfo2(evtID - 1);	// if we need to, and we haven't done so, do it and lower event # by 1
+        SavePrimPtclInfo2(evtID - 1);   // if we need to, and we haven't done so, do it and lower event # by 1
       }
       else if(iNbCoincidence == iMaxNbCoin - 1)
       {
-	SavePrimPtclInfo2(evtID - 2);	// if we have fired 1 already, lower the event number by 2
+        SavePrimPtclInfo2(evtID - 2);   // if we have fired 1 already, lower the event number by 2
       }
 
-	// THIS IS GENERALIZABLE. IF THERE ARE MORE THAN 2 COINCIDENCES, KEEP ADDING IF-ELSE STATEMENTS.
-	// But do not add more than number of coincidences since iNbCoincidence == 0 is a check later
+        // THIS IS GENERALIZABLE. IF THERE ARE MORE THAN 2 COINCIDENCES, KEEP ADDING IF-ELSE STATEMENTS.
+        // But do not add more than number of coincidences since iNbCoincidence == 0 is a check later
 
       // since we've now accounted for one coincidence, lower the number of coincidences in the counter
       iNbCoincidence = iNbCoincidence - 1;
       if(iNbCoincidence < 0)
+      {
         G4cout << "RUN-TIME ERROR IN CODE. iNbCoincidence went below 0. Makes no sense." << G4endl;
-
+      }
       if(iNbCoincidence == 0)
       {
         iCoincidencePtcl.clear();
         iMaxNbCoin = 0;                 // this is reset but only used for incidences where more than...
       }                                 // ...1 coincidence ptcl i.e. 139Ce
     }
-*/
-    // 207Bi
+  }
+  else if(sPtclType == "Bi207")
+  {
+    if(evtID == 0)
+    {
+      G4cout << "Using GEANT4 particle generation to create initial Bi207 particles..." << G4endl;
+    }
+
+    Set_207BiSource();
+
+    // 207Bi print out
+    if(bCoincidenceWasFired == false)
+    {
+      SavePrimPtclInfo2(evtID);
+    }
     else if(bCoincidenceWasFired == true)
     {
       // check if we've fired any coincidences (and if we need to)
@@ -182,18 +218,17 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
       // since we've now accounted for one coincidence, lower the number of coincidences in the counter
       iNbCoincidence = iNbCoincidence - 1;
       if(iNbCoincidence < 0)
+      {
         G4cout << "RUN-TIME ERROR IN CODE. iNbCoincidence went below 0. Makes no sense." << G4endl;
-
+      }
       if(iNbCoincidence == 0)
       {
         iCoincidencePtcl.clear();
         iMaxNbCoin = 0;                 // this is reset but only used for incidences where more than...
-      }                                 // ...1 coincidence ptcl i.e. 139Ce
+      }                                 // ...1 coincidence ptcl
     }
-
-
-
   }
+
   fParticleGun -> GeneratePrimaryVertex(anEvent);
 }
 

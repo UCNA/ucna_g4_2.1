@@ -102,7 +102,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
     G4UIcmdWithAString* uiOutputFileCmd;	// which output file name to take
     G4String sOutputFileName;
 
-    G4bool bUseExternal;		// whether we use external kinematics file or not
+    G4UIcmdWithAString* uiParticleGenTypeCmd;
+    G4String sPtclType;
 
 };
 

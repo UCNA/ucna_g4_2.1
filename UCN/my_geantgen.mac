@@ -7,6 +7,9 @@
 /detector/sourceholderpos 0 0 0 m
 /detector/sourceholder true		# either place source holder in world or not
 					# this ^^ is very dependent on the file type of /particleGun/inputName
+# choose type of ptcl to fire (options: external, Sn113, Ce139, Bi207)
+/particleGun/ptclType Ce139	# external means we have an external file to read from.
+
 # extra pre-initialization commands here
 /detector/sourcefoilthick 9.5 um
 /detector/rotation 0.037
