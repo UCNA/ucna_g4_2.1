@@ -402,7 +402,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
     if((dr1 >= 0) && (dr1 <= 83.86))
     {
       G4double dr5 = G4UniformRand()*100;
-      if((dr5 >= 0) && (dr5 <= 0 /*1.3796*/))	// fire an Auger without any other coincidences (since stable level)
+      if((dr5 >= 0) && (dr5 <= 2.50733))	// fire an Auger without any other coincidences (since stable level)
       {
         fParticleGun -> SetParticleEnergy(56.7*keV);
         particle = particleTable->FindParticle(particleName="e-");
@@ -428,7 +428,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
 	  {
 	    // i.e. if we are firing a CE, check if we get an Auger
 	    G4double dr7 = G4UniformRand()*100;
-	    if((dr7 >= 0) && (dr7 <= 1.3796)) // sets an Auger in coincidence with init gamma ray + second CE
+	    if((dr7 >= 0) && (dr7 <= 2.50733)) // sets an Auger in coincidence with init gamma ray + second CE
 	    {
               iCoincidencePtcl.push_back(1);
               dCoincidenceEnergies.push_back(56.7*keV);
@@ -465,7 +465,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
 	{
 	  // CE is taking us from 3rd excited to 1st excited. Check for Auger
           G4double dr17 = G4UniformRand()*100;
-          if((dr17 >= 0) && (dr17 <= 1.3796))
+          if((dr17 >= 0) && (dr17 <= 2.50733))
           {
             iCoincidencePtcl.push_back(1);
             dCoincidenceEnergies.push_back(56.7*keV);
@@ -504,7 +504,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
 	  {
 	    // i.e. if we are firing a CE, from 1st to GS, check if we get an Auger
 	    G4double dr19 = G4UniformRand()*100;
-	    if((dr19 >= 0) && (dr19 <= 1.3796)) // sets an Auger in coincidence with init gamma ray + second CE
+	    if((dr19 >= 0) && (dr19 <= 2.50733)) // sets an Auger in coincidence with init gamma ray + second CE
 	    {
               iCoincidencePtcl.push_back(1);
               dCoincidenceEnergies.push_back(56.7*keV);
@@ -543,7 +543,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
     {
       // on the way to upper branch, check if we get an Auger electron
       G4double dr8 = G4UniformRand()*100;
-      if((dr8 >= 0) && (dr8 <= 1.3796)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
+      if((dr8 >= 0) && (dr8 <= 2.50733)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
       {	// note this is added as a coincidence since we are guaranteed a ptcl in the decay down from 4th excited
         iCoincidencePtcl.push_back(1);
         dCoincidenceEnergies.push_back(56.7*keV);
@@ -569,7 +569,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
 	{
 	  G4double dr12 = G4UniformRand()*100;
 	  // since a CE drops us from 1st excited to GS, check for an Auger in coincidence
-	  if((dr12 >= 0) && (dr12 <= 1.3796))
+	  if((dr12 >= 0) && (dr12 <= 2.50733))
 	  {
 	    iCoincidencePtcl.push_back(1);
 	    dCoincidenceEnergies.push_back(56.7*keV);
@@ -605,7 +605,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
       else if((dr1 > 90.73) && (dr1 <= 90.7572))
       {	// if we fire a CE in the decay from 4th excited to 1st excited, check if we get an Auger in coincidence
         G4double dr9 = G4UniformRand()*100;
-        if((dr9 >= 0) && (dr9 <= 1.3796)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
+        if((dr9 >= 0) && (dr9 <= 2.50733)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
         {
           iCoincidencePtcl.push_back(1);
           dCoincidenceEnergies.push_back(56.7*keV);
@@ -637,7 +637,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
         {
           G4double dr12 = G4UniformRand()*100;
           // since a CE drops us from 1st excited to GS, check for an Auger in coincidence
-          if((dr12 >= 0) && (dr12 <= 1.3796))
+          if((dr12 >= 0) && (dr12 <= 2.50733))
           {
             iCoincidencePtcl.push_back(1);
             dCoincidenceEnergies.push_back(56.7*keV);
@@ -688,7 +688,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
 	else if((dr14 > 0.128) && (dr14 <= 0.130962))
 	{	// this means a CE is taking us to GS. So check for Augers
 	  G4double dr15 = G4UniformRand()*100;
-	  if((dr15 >= 0) && (dr15 <= 1.3796))
+	  if((dr15 >= 0) && (dr15 <= 2.50733))
 	  {
             iCoincidencePtcl.push_back(1);
             dCoincidenceEnergies.push_back(56.7*keV);
@@ -723,7 +723,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
       else if((dr1 > 90.8882) && (dr1 <= 90.8886307))
       {	// if we fire a CE in the decay from 4th excited to 2nd excited, check if we get an Auger in coincidence
         G4double dr10 = G4UniformRand()*100;
-        if((dr10 >= 0) && (dr10 <= 1.3796)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
+        if((dr10 >= 0) && (dr10 <= 2.50733)) // sets an Auger in coincidence with neutron capture decay to 4th excited state
         {
           iCoincidencePtcl.push_back(1);
           dCoincidenceEnergies.push_back(56.7*keV);
@@ -759,7 +759,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
         else if((dr14 > 0.128) && (dr14 <= 0.130962))
         {       // this means a CE is taking us to GS. So check for Augers
           G4double dr15 = G4UniformRand()*100;
-          if((dr15 >= 0) && (dr15 <= 1.3796))
+          if((dr15 >= 0) && (dr15 <= 2.50733))
           {
             iCoincidencePtcl.push_back(1);
             dCoincidenceEnergies.push_back(56.7*keV);
@@ -799,7 +799,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
     {
       // since this neutron capture is decaying to 1st excited, check for an Auger
       G4double dr20 = G4UniformRand()*100;
-      if((dr20 >= 0) && (dr20 <= 1.3796))
+      if((dr20 >= 0) && (dr20 <= 2.50733))
       {
         iCoincidencePtcl.push_back(1);
         dCoincidenceEnergies.push_back(56.7*keV);
@@ -818,7 +818,7 @@ void PrimaryGeneratorAction::Set_207BiSource()
       else if((percent1stToGS > 97.75) && (percent1stToGS < 99.84))
       {	// decay 1st to GS via CE. Check for an Auger.
         G4double dr21 = G4UniformRand()*100;
-        if((dr21 >= 0) && (dr21 <= 1.3796))
+        if((dr21 >= 0) && (dr21 <= 2.50733))
         {
           iCoincidencePtcl.push_back(1);
           dCoincidenceEnergies.push_back(56.7*keV);
