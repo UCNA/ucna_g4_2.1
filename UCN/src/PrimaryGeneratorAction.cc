@@ -104,8 +104,6 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 //    Set_139CeSource();
     Set_207BiSource();
 
-    G4cout << "Completed setting source." << G4endl;
-
     if(bCoincidenceWasFired == false)
     {
       SavePrimPtclInfo2(evtID);
@@ -372,8 +370,6 @@ void PrimaryGeneratorAction::Set_207BiSource()
   G4String particleName;
   G4ParticleDefinition* particle;
 
-  G4cout << "Starting to set source. Size of iCoincidencePtcl is " << iCoincidencePtcl.size() << G4endl;
-
   if(iNbCoincidence > 0)
   {
     if(iCoincidencePtcl[iCoincidencePtcl.size() - 1] == 1)           // create a K shell Auger electron for 139Ce
@@ -403,8 +399,6 @@ void PrimaryGeneratorAction::Set_207BiSource()
 						// The upper 2 are calculated from nndc data, the 1st excited
 						// is taken from the less precise decay scheme on nndc
     // headed to the stable branch (this entire thing is 1 cascade of coincidences)
-    G4cout << "Firing a beginning paticle. dr1 = " << dr1 << G4endl;
-
     if((dr1 >= 0) && (dr1 <= 83.86))
     {
       G4double dr5 = G4UniformRand()*100;
