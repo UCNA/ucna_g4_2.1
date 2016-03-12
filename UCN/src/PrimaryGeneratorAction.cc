@@ -16,11 +16,11 @@
 #include <cmath>	// That is because, as far as I know, ROOT and GEANT4 use the same global variable names
 #include <string>	// so they have a ton of "shadow declarations" of each other.
 			// Should be ok since ideally they are in their own workspace.
-#include <TFile.h>	// these are the only instances of ROOT classes.
-#include <TTree.h>	// they compile fine on my machine. But if you are having trouble
+//#include <TFile.h>	// these are the only instances of ROOT classes.
+//#include <TTree.h>	// they compile fine on my machine. But if you are having trouble
 			// can remove them and use them as a standalone. These guys only
 			// appear in ConvertTreeToTxt(...). Can do this before sim if ROOT is tricky
-#define	TEXT_FILE_NAME	"Evts_initPtclKin_TTreeToTextFile.txt"
+//#define	TEXT_FILE_NAME	"Evts_initPtclKin_TTreeToTextFile.txt"
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
 : G4VUserPrimaryGeneratorAction(), G4UImessenger(),
@@ -243,9 +243,9 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
 
-    ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
+//    ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
 
-    LoadFile(TEXT_FILE_NAME);
+    LoadFile(sInputFileName);
 
     if(fMyDetector -> GetUseSourceHolder() == false)
     {
@@ -311,7 +311,7 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   fParticleGun -> SetParticleTime(fEvtsArray[nID].event_time*ns);
 
 }
-
+/*
 void PrimaryGeneratorAction::ConvertTreeToTxt(G4String treeName, G4String txtFileName)
 {
   G4cout << "Reading in events kinematics from " << treeName << G4endl;
@@ -360,7 +360,7 @@ void PrimaryGeneratorAction::ConvertTreeToTxt(G4String treeName, G4String txtFil
   outfile.close();
 
   G4cout << "Finished reading TTree events and writing to .txt file named " << txtFileName << G4endl;
-}
+} */
 
 void PrimaryGeneratorAction::LoadFile(G4String fileName)
 {

@@ -84,7 +84,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, G4UImesseng
 
     void UseExternalKinFile(int nID);
     void LoadFile(G4String fileName);
-    void ConvertTreeToTxt(G4String treeName, G4String txtFileName);
+//    void ConvertTreeToTxt(G4String treeName, G4String txtFileName);
 
     void DiskRandom(G4double radius, G4double& x, G4double& y);
     void DisplayGunStatus();
