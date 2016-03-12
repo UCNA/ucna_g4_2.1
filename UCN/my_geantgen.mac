@@ -5,10 +5,10 @@
 /detector/vacuum 1.e-5 torr
 
 /detector/sourceholderpos 0 0 0 m
-/detector/sourceholder true		# either place source holder in world or not
+/detector/sourceholder false		# either place source holder in world or not
 					# this ^^ is very dependent on the file type of /particleGun/inputName
 # choose type of ptcl to fire (options: external, Sn113, Ce139, Bi207)
-/particleGun/ptclType Ce139	# external means we have an external file to read from.
+/particleGun/ptclType external	# external means we have an external file to read from.
 
 # extra pre-initialization commands here
 /detector/sourcefoilthick 9.5 um
@@ -16,9 +16,9 @@
 /detector/offset -3.98 0.44 0 mm
 
 # Supply the full path to input ptcl file, and names of the output files
-/particleGun/inputName /home/xuansun/Documents/Caltech/UCNA_Sim/ucna_g4_2.1/UCN/EventGenTools/G4Sim_Ptcl_Input_Files/big_initPtclInfo.txt
-/particleGun/outputName UCNASimOutput.txt	# Note: these two output names (and paths)
-/event/outputName UCNASimOutput.txt		# need to be identical
+/particleGun/inputName /home/xuansun/Documents/Caltech/UCNA_Sim/ucna_g4_2.1/UCN/EventGenTools/Sn113_o_p/Evts_0.root
+/particleGun/outputName UCNASimOutput_test.txt	# Note: these two output names (and paths)
+/event/outputName UCNASimOutput_test.txt		# need to be identical
 
 ###### Run initialization and start
 

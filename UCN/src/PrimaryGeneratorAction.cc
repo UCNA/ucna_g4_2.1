@@ -12,10 +12,15 @@
 
 #include <iostream>
 #include <fstream>
-#include <math.h>
-#include <cmath>
-#include <string>
-using   namespace       std;
+#include <math.h>	// NOTE: if you include these ROOT classes below, you'll get a ton of compiler warnings
+#include <cmath>	// That is because, as far as I know, ROOT and GEANT4 use the same global variable names
+#include <string>	// so they have a ton of "shadow declarations" of each other.
+			// Should be ok since ideally they are in their own workspace.
+#include <TFile.h>	// these are the only instances of ROOT classes.
+#include <TTree.h>	// they compile fine on my machine. But if you are having trouble
+			// can remove them and use them as a standalone. These guys only
+			// appear in ConvertTreeToTxt(...). Can do this before sim if ROOT is tricky
+#define	TEXT_FILE_NAME	"Evts_initPtclKin_TTreeToTextFile.txt"
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
 : G4VUserPrimaryGeneratorAction(), G4UImessenger(),
@@ -237,7 +242,10 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   if(bIsLoaded == false)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
-    LoadFile(sInputFileName);
+
+    ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
+
+    LoadFile(TEXT_FILE_NAME);
 
     if(fMyDetector -> GetUseSourceHolder() == false)
     {
@@ -302,6 +310,56 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
 
   fParticleGun -> SetParticleTime(fEvtsArray[nID].event_time*ns);
 
+}
+
+void PrimaryGeneratorAction::ConvertTreeToTxt(G4String treeName, G4String txtFileName)
+{
+  G4cout << "Reading in events kinematics from " << treeName << G4endl;
+
+  // opens the MC_EventGen created Evts_#.root file in directory passed to it by my_geantgen.mac file
+  TFile* fRead = TFile::Open(treeName);
+  // extracts the TTree object inside. I've checked and it is called Evts
+  TTree* tree = (TTree*)fRead -> Get("Evts");
+
+  int nEntries = tree -> GetEntries();
+
+  int eid = 0;  // these are the variable types found in EventTreeScanner
+  double initE = 0;
+  double p[3];
+  double x[3];
+  int decayFlag = 0;
+  double t = 0;
+  double w = 1.0;
+
+  tree -> SetBranchAddress("num", &eid);
+  tree -> SetBranchAddress("PID", &decayFlag);
+  tree -> SetBranchAddress("KE", &initE);
+  tree -> SetBranchAddress("vertex", &x);
+  tree -> SetBranchAddress("direction", &p);
+  tree -> SetBranchAddress("time", &t);
+  tree -> SetBranchAddress("weight", &w);
+
+  // If the file is opened for output operations and it already existed, its previous content
+  // is deleted and replaced by the new one.
+  ofstream outfile;
+  outfile.open(txtFileName, ios::trunc);
+
+  for(int i = 0; i < nEntries; i++)
+  {
+    tree -> GetEntry(i);
+    outfile     << eid << "\t"
+                << decayFlag << "\t"
+                << initE << "\t"
+                << x[0] << "\t" << x[1] << "\t" << x[2] << "\t"
+                << p[0] << "\t" << p[1] << "\t" << p[2] << "\t"
+                << t << "\t"
+                << w << "\n";
+
+  }
+
+  outfile.close();
+
+  G4cout << "Finished reading TTree events and writing to .txt file named " << txtFileName << G4endl;
 }
 
 void PrimaryGeneratorAction::LoadFile(G4String fileName)

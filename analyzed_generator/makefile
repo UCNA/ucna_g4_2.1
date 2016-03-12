@@ -12,8 +12,7 @@ LDLIBS		= `root-config --glibs`
 CFLAGS 		= $(CXX) $(CXXFLAGS) -W -Wall -o $@ $^ $(LDLIBS)
 
 #These variables need to be changed to the name of the executable/source
-#SOURCE		= sumTxtSpectra.cc sumTxtSpectra.hh
-SOURCE		= ttree.cc
+SOURCE		= ttree.cc ttree.hh
 EXECUTABLE 	= ttree
 
 all:	$(EXECUTABLE)

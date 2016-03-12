@@ -23,7 +23,7 @@ include(${Geant4_USE_FILE})
 #----------------------------------------------------------------------------
 # Find ROOT (required package)
 #
-#find_package(ROOT REQUIRED)
+find_package(ROOT REQUIRED)
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project

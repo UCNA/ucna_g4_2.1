@@ -3,6 +3,8 @@
 #define		N_SD			4
 #define		NB_MAX_COINCIDENCES	7
 
+// note to self: this code is meant to get hacked up in order to correctly get the GEANT4 sim output into a TTree
+
 //required later for plot_program
 TApplication plot_program("FADC_readin",0,0,0,0);
 
@@ -11,22 +13,31 @@ void ReadAndPrint(TString inputFileName, TTree* outTree);
 int main()
 {
   // loop, sum and store the .txt version
-  for(int j = 0; j < 10; j++)
+  // You only need this for multiple files.
+/*  for(int j = 0; j < 10; j++)
   {
     FillEventInfo(Form("139Ce_Data_10mill/UCNASimOutput_139Ce_%i.txt", j));
     cout << "Event info array is size " << InfoArray.size() << endl;
     PrintToTxtFile("CoincidenceSummed_139Ce.txt");
     InfoArray.clear();	//  this resets all the entries so we can count again
   }
+*/
 
+  // if you have just 1 file that is a source run, use FillEventInfo and PrintToTxtFile once (no loop).
+  FillEventInfo("139Ce_Data_10mill/UCNASimOutput_139Ce_0.txt");
+  cout << "Event info array is size " << InfoArray.size() << endl;
+  PrintToTxtFile("CoincidenceSummed_2011-2012_Ce139.txt");
+
+
+  // if you have betas, just read in a file (or use FillEventInfo, it'll just be longer since it checks for coincidences).
 
   // Store the TTree version
-  TFile file("xuan_analyzed_139Ce.root", "RECREATE");
+  TFile file("xuan_analyzed_2011-2012_Ce139.root", "RECREATE");
   // note: for arrays you don't need to use & deallocator.
   // Probably cause the array variable is already a pointer.
   // For primitive types (including wrapper classes _t), you need &.
   TTree* anaTree = new TTree("anaTree", "tree for analysis");
-  ReadAndPrint("CoincidenceSummed_139Ce.txt", anaTree);
+  ReadAndPrint("CoincidenceSummed_2011-2012_Ce139.txt", anaTree);
   anaTree -> Write();
 
 
@@ -143,6 +154,11 @@ void FillEventInfo(TString fileName)
           if(indexArray.size() > 0)
           {
             int index = indexArray[0];
+	    if(evt.sid == 11)	// check if it's an electron
+	    {
+		InfoArray[index].sid = 11;	// if in our cascade we got an electron
+	    }					// record the whole ptcl ID as an electron
+
             InfoArray[index].ke += evt.ke;
             InfoArray[index].se_e += evt.se_e;
             InfoArray[index].se_eq += evt.se_eq;
@@ -195,6 +211,9 @@ void FillEventInfo(TString fileName)
     }
     if(i%100000 == 0)
         cout << "Reading in event " << i << " from file " << fileName << endl;
+
+    if(i == 1500000)
+	break;
 
     i++;
   }
