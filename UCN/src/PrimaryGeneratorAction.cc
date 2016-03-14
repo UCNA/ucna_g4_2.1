@@ -20,7 +20,14 @@
 //#include <TTree.h>	// they compile fine on my machine. But if you are having trouble
 			// can remove them and use them as a standalone. These guys only
 			// appear in ConvertTreeToTxt(...). Can do this before sim if ROOT is tricky
-//#define	TEXT_FILE_NAME	"Evts_initPtclKin_TTreeToTextFile.txt"
+
+#include	 <TCanvas.h>
+#include	 <TApplication.h>
+#include	 <TROOT.h>
+#include	 <TFile.h>
+#include	 <TTree.h>
+
+#define	TEXT_FILE_NAME	"Evts_initPtclKin_TTreeToTextFile.txt"
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
 : G4VUserPrimaryGeneratorAction(), G4UImessenger(),
@@ -243,9 +250,9 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
 
-//    ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
-
-    LoadFile(sInputFileName);
+    ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
+    LoadFile(TEXT_FILE_NAME);
+//    LoadFile(sInputFileName);
 
     if(fMyDetector -> GetUseSourceHolder() == false)
     {
@@ -311,9 +318,65 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   fParticleGun -> SetParticleTime(fEvtsArray[nID].event_time*ns);
 
 }
-/*
+
 void PrimaryGeneratorAction::ConvertTreeToTxt(G4String treeName, G4String txtFileName)
 {
+  // This is so bizarre. I get a seg fault whenever I run this method without first creating some TROOT objects.
+  // But if I have these two lines of code, which do NOTHING to the code, then I do not get a seg fault.
+  // My intuition is that by creating these ROOT objects, they load particular libraries that I need access to.
+  // HENCE, YOU MUST LEAVE THESE LINES HERE, OR ELSE THIS METHOD WILL SEG FAULT.
+  TCanvas* myC = new TCanvas("canvas", "canvas");
+
+
+/*  TFile* fRead = TFile::Open("Evts_0.root");
+  TTree* tree = (TTree*)fRead -> Get("Evts");
+
+  G4cout << "Created some ROOT objects..." << G4endl;
+
+  int nEntries = tree -> GetEntries();
+
+  G4cout << "Number of entries in input kinematics tree: " << nEntries << G4endl;
+
+  int eid = 0;  // these are the variable types found in EventTreeScanner
+  double initE = 0;
+  double p[3];
+  double x[3];
+  int decayFlag = 0;
+  double t = 0;
+  double w = 1.0;
+
+  tree -> SetBranchAddress("num", &eid);
+  tree -> SetBranchAddress("PID", &decayFlag);
+  tree -> SetBranchAddress("KE", &initE);
+  tree -> SetBranchAddress("vertex", &x);
+  tree -> SetBranchAddress("direction", &p);
+  tree -> SetBranchAddress("time", &t);
+  tree -> SetBranchAddress("weight", &w);
+
+  G4cout << "Set the branch addresses..." << G4endl;
+
+
+  ofstream outfile;
+  outfile.open(txtFileName, ios::trunc);
+
+  for(int i = 0; i < nEntries; i++)
+  {
+    tree -> GetEntry(i);
+    outfile     << eid << "\t"
+                << decayFlag << "\t"
+                << initE << "\t"
+                << x[0] << "\t" << x[1] << "\t" << x[2] << "\t"
+                << p[0] << "\t" << p[1] << "\t" << p[2] << "\t"
+                << t << "\t"
+                << w << "\n";
+
+  }
+
+
+  outfile.close();
+
+  G4cout << "Finished reading TTree events and writing to .txt file named " << txtFileName << G4endl;
+*/
   G4cout << "Reading in events kinematics from " << treeName << G4endl;
 
   // opens the MC_EventGen created Evts_#.root file in directory passed to it by my_geantgen.mac file
@@ -360,7 +423,7 @@ void PrimaryGeneratorAction::ConvertTreeToTxt(G4String treeName, G4String txtFil
   outfile.close();
 
   G4cout << "Finished reading TTree events and writing to .txt file named " << txtFileName << G4endl;
-} */
+}
 
 void PrimaryGeneratorAction::LoadFile(G4String fileName)
 {
