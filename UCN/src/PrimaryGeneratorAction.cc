@@ -16,11 +16,10 @@
 #include <cmath>	// That is because, as far as I know, ROOT and GEANT4 use the same global variable names
 #include <string>	// so they have a ton of "shadow declarations" of each other.
 			// Should be ok since ideally they are in their own workspace.
-//#include <TFile.h>	// these are the only instances of ROOT classes.
-//#include <TTree.h>	// they compile fine on my machine. But if you are having trouble
+			// these are the only instances of ROOT classes.
+			// they compile fine on my machine. But if you are having trouble
 			// can remove them and use them as a standalone. These guys only
 			// appear in ConvertTreeToTxt(...). Can do this before sim if ROOT is tricky
-
 #include	 <TCanvas.h>
 #include	 <TApplication.h>
 #include	 <TROOT.h>
@@ -252,16 +251,15 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
 
     ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
     LoadFile(TEXT_FILE_NAME);
-//    LoadFile(sInputFileName);
 
     if(fMyDetector -> GetUseSourceHolder() == false)
     {
-      G4cout << "\n Loading neutron beta decay events..." << G4endl;
+      G4cout << "------> Source holder NOT placed so ptcl positions given by external kinematics file." << G4endl;
     }
     else if(fMyDetector -> GetUseSourceHolder() == true)
     {
-      G4cout << "\n Adjusting initial ptcl position for source holder use..." << G4endl;
-      G4cout << " Randomly throwing events in source holder radius: " << fSourceRadius/mm << " mm." << G4endl;
+      G4cout << "------> Source holder is placed." << G4endl;
+      G4cout << "Adjusting ptcl positions by additionally randomizing in source holder radius: " << fSourceRadius/mm << " mm." << G4endl;
     }
 
   }
@@ -327,56 +325,6 @@ void PrimaryGeneratorAction::ConvertTreeToTxt(G4String treeName, G4String txtFil
   // HENCE, YOU MUST LEAVE THESE LINES HERE, OR ELSE THIS METHOD WILL SEG FAULT.
   TCanvas* myC = new TCanvas("canvas", "canvas");
 
-
-/*  TFile* fRead = TFile::Open("Evts_0.root");
-  TTree* tree = (TTree*)fRead -> Get("Evts");
-
-  G4cout << "Created some ROOT objects..." << G4endl;
-
-  int nEntries = tree -> GetEntries();
-
-  G4cout << "Number of entries in input kinematics tree: " << nEntries << G4endl;
-
-  int eid = 0;  // these are the variable types found in EventTreeScanner
-  double initE = 0;
-  double p[3];
-  double x[3];
-  int decayFlag = 0;
-  double t = 0;
-  double w = 1.0;
-
-  tree -> SetBranchAddress("num", &eid);
-  tree -> SetBranchAddress("PID", &decayFlag);
-  tree -> SetBranchAddress("KE", &initE);
-  tree -> SetBranchAddress("vertex", &x);
-  tree -> SetBranchAddress("direction", &p);
-  tree -> SetBranchAddress("time", &t);
-  tree -> SetBranchAddress("weight", &w);
-
-  G4cout << "Set the branch addresses..." << G4endl;
-
-
-  ofstream outfile;
-  outfile.open(txtFileName, ios::trunc);
-
-  for(int i = 0; i < nEntries; i++)
-  {
-    tree -> GetEntry(i);
-    outfile     << eid << "\t"
-                << decayFlag << "\t"
-                << initE << "\t"
-                << x[0] << "\t" << x[1] << "\t" << x[2] << "\t"
-                << p[0] << "\t" << p[1] << "\t" << p[2] << "\t"
-                << t << "\t"
-                << w << "\n";
-
-  }
-
-
-  outfile.close();
-
-  G4cout << "Finished reading TTree events and writing to .txt file named " << txtFileName << G4endl;
-*/
   G4cout << "Reading in events kinematics from " << treeName << G4endl;
 
   // opens the MC_EventGen created Evts_#.root file in directory passed to it by my_geantgen.mac file

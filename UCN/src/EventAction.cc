@@ -234,6 +234,38 @@ void EventAction::EndOfEventAction(const G4Event* evt)
   event.MWPC_activeWireVol[0] = SD_info[fActiveWireVolEast_index];
   event.MWPC_activeWireVol[1] = SD_info[fActiveWireVolWest_index];
 
+  for(int t = 0; t < 2; t++)
+  {
+    for(int tt = 0; tt < 3; tt++)
+    {
+	// go in and divide out, entry by entry, the energy component of the position where Edep is.
+	// Inner loop goes over the G4ThreeVector components (via array indexing syntax)
+	// Outer loop goes over the 2 crystals and 2 MWPC regions in a single event.
+      if(event.Scint_crystals[t].energy > 0)
+      {
+	// divide out the energy from the weighted energy, component by component
+        event.Scint_crystals[t].edepWeightedPos[tt] = 
+	event.Scint_crystals[t].edepWeightedPos[tt] / event.Scint_crystals[t].energy;
+
+	// now that the position coordinate is given, divide our sigma by energy and subtract position^2, then sqrt -> units of pos
+	event.Scint_crystals[t].edepWeightedPos2[tt] = sqrt( 
+	event.Scint_crystals[t].edepWeightedPos2[tt] / event.Scint_crystals[t].energy - 
+	event.Scint_crystals[t].edepWeightedPos[tt]*event.Scint_crystals[t].edepWeightedPos[tt] );
+      }
+
+
+      if(event.MWPC_activeWireVol[t].energy > 0)
+      {
+        event.MWPC_activeWireVol[t].edepWeightedPos[tt] = 
+	event.MWPC_activeWireVol[t].edepWeightedPos[tt] / event.MWPC_activeWireVol[t].energy;
+
+	event.MWPC_activeWireVol[t].edepWeightedPos2[tt] = sqrt( 
+	event.MWPC_activeWireVol[t].edepWeightedPos2[tt] / event.MWPC_activeWireVol[t].energy - 
+	event.MWPC_activeWireVol[t].edepWeightedPos[tt]*event.MWPC_activeWireVol[t].edepWeightedPos[tt] );
+      }
+    }
+  }
+
 
   // print out of class member variables due to stepping action
   ofstream outfile;
@@ -249,12 +281,12 @@ void EventAction::EndOfEventAction(const G4Event* evt)
   	  << event.Scint_crystals[j].energyQuenched/keV << "\t"
 	  << event.Scint_crystals[j].hitTime/s << "\t"
 	  << event.Scint_crystals[j].NbOfTracks << "\t"
-	  << (event.Scint_crystals[j].edepWeightedPos).x()/(m*keV) << "\t"
-          << (event.Scint_crystals[j].edepWeightedPos).y()/(m*keV) << "\t"
-          << (event.Scint_crystals[j].edepWeightedPos).z()/(m*keV) << "\t"
-	  << (event.Scint_crystals[j].edepWeightedPos2).x()/(m*m*keV) << "\t"
-          << (event.Scint_crystals[j].edepWeightedPos2).y()/(m*m*keV) << "\t"
-          << (event.Scint_crystals[j].edepWeightedPos2).z()/(m*m*keV) << "\t"
+	  << (event.Scint_crystals[j].edepWeightedPos).x()/m << "\t"
+          << (event.Scint_crystals[j].edepWeightedPos).y()/m << "\t"
+          << (event.Scint_crystals[j].edepWeightedPos).z()/m << "\t"
+	  << (event.Scint_crystals[j].edepWeightedPos2).x()/m << "\t"
+          << (event.Scint_crystals[j].edepWeightedPos2).y()/m << "\t"
+          << (event.Scint_crystals[j].edepWeightedPos2).z()/m << "\t"
 	  << event.Scint_crystals[j].thetaIn/deg << "\t"
 	  << event.Scint_crystals[j].thetaOut/deg << "\t"
 	  << event.Scint_crystals[j].keIn/keV << "\t"
@@ -265,12 +297,12 @@ void EventAction::EndOfEventAction(const G4Event* evt)
           << event.MWPC_activeWireVol[j].energyQuenched/keV << "\t"
           << event.MWPC_activeWireVol[j].hitTime/s << "\t"
           << event.MWPC_activeWireVol[j].NbOfTracks << "\t"
-          << (event.MWPC_activeWireVol[j].edepWeightedPos).x()/(m*keV) << "\t"
-          << (event.MWPC_activeWireVol[j].edepWeightedPos).y()/(m*keV) << "\t"
-          << (event.MWPC_activeWireVol[j].edepWeightedPos).z()/(m*keV) << "\t"
-          << (event.MWPC_activeWireVol[j].edepWeightedPos2).x()/(m*m*keV) << "\t"
-          << (event.MWPC_activeWireVol[j].edepWeightedPos2).y()/(m*m*keV) << "\t"
-          << (event.MWPC_activeWireVol[j].edepWeightedPos2).z()/(m*m*keV) << "\t"
+          << (event.MWPC_activeWireVol[j].edepWeightedPos).x()/m << "\t"
+          << (event.MWPC_activeWireVol[j].edepWeightedPos).y()/m << "\t"
+          << (event.MWPC_activeWireVol[j].edepWeightedPos).z()/m << "\t"
+          << (event.MWPC_activeWireVol[j].edepWeightedPos2).x()/m << "\t"
+          << (event.MWPC_activeWireVol[j].edepWeightedPos2).y()/m << "\t"
+          << (event.MWPC_activeWireVol[j].edepWeightedPos2).z()/m << "\t"
           << event.MWPC_activeWireVol[j].thetaIn/deg << "\t"
           << event.MWPC_activeWireVol[j].thetaOut/deg << "\t"
           << event.MWPC_activeWireVol[j].keIn/keV << "\t"
