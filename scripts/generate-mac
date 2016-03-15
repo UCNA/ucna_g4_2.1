@@ -4,7 +4,8 @@
 
 echo "Generating mac files..."
 
-cd ${UCNA_BASE}/scripts/testing/
+#cd ../UCN-build/	# these two 'cd' should accomplish the same thing
+cd ${UCNA_BASE}/UCN-build/
 
 echo "Files being saved in "
 pwd
@@ -16,10 +17,10 @@ ptclType=Sn113
 input=${UCNA_BASE}/UCN/EventGenTools/Sn113_o_p/
 output=UCNASimOutput_test
 nEvts=1000000
-
 ##### 							#####
 
 rm xuan_geantgen*.mac
+rm GNUParallel_commands.txt
 
 # in this loop, set the number of .mac files you want to generate
 for ((x = 0; x < 100; x = x + 1))
@@ -32,8 +33,12 @@ sed -i 's/REPLACEWITHUSESOURCEHOLDER/'$useSrcHolder'/g' xuan_geantgen_$x.mac
 sed -i 's/REPLACEWITHPTCLTYPE/'$ptclType'/g' xuan_geantgen_$x.mac
 # use the | delimiter instead of / since you need to insert a path with "/" characters
 sed -i 's|REPLACEWITHINPUTFILE|'$input\Evts_$x\.root'|g' xuan_geantgen_$x.mac
-sed -i 's/REPLACEWITHOUTPUTFILE/'$output\_$x\.txt'/g' xuan_geantgen_$x.mac
+sed -i 's/REPLACEWITHOUTPUTFILE/'$output\_$ptclType\_$geom'Geom'\_$x\.txt'/g' xuan_geantgen_$x.mac
 sed -i 's/REPLACEWITHNUMBEREVENTS/'$nEvts'/g' xuan_geantgen_$x.mac
+
+# note the > means pipe to file, >> means append. Use > here
+# also, in order to get it to properly reference x, need to put it outside quotes
+echo './ucn xuan_geantgen_'$x'.mac >> g4_run_'$x'.txt' >> GNUParallel_commands.txt
 
 done
 
