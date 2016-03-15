@@ -26,8 +26,6 @@
 #include	 <TFile.h>
 #include	 <TTree.h>
 
-#define	TEXT_FILE_NAME	"Evts_initPtclKin_TTreeToTextFile.txt"
-
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
 : G4VUserPrimaryGeneratorAction(), G4UImessenger(),
   fParticleGun(0),
@@ -249,8 +247,10 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
 
-    ConvertTreeToTxt(sInputFileName, TEXT_FILE_NAME);
-    LoadFile(TEXT_FILE_NAME);
+    G4String convertedTree= "Evts_initPtclKin_TTreeToTextFile_" + sOutputFileName;
+
+    ConvertTreeToTxt(sInputFileName, convertedTree);
+    LoadFile(convertTree);
 
     if(fMyDetector -> GetUseSourceHolder() == false)
     {
