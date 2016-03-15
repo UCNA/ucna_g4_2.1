@@ -213,7 +213,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     Trap.dWindowThick = 0.180*um;
     Trap.dCoatingThick = 0.150*um;
   }
-  else if(sGeometry == "2011/2012")
+  else if(sGeometry == "2011-2012")
   {     // Michael Brown's changes that form the 2011/2012 detector geometry
     Trap.dWindowThick = 0.500*um;
     Trap.mDecayTrapWindowMat = Mylar;

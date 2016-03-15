@@ -1,3 +1,10 @@
+##### NOTE THIS IS NOT THE MAIN MACRO FILE
+# I made a master_geantgen.mac file which is designed to run
+# with the generate-mac script located in {UCNA_BASE}/scripts
+# This is an example xuan_geantgen.mac which is copied over to UCN-build
+# in case you want to do some quick .mac work. For multi-thread simulations
+# use the generate-mac script.
+
 ###### Pre-initialization commands
 # spectrometer decay trap geometry name
 /detector/geometry 2011/2012

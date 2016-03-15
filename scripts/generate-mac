@@ -1,0 +1,40 @@
+#!/bin/bash
+# Linux/UNIX box with ssh key based login enabled
+# SSH User name
+
+echo "Generating mac files..."
+
+cd ${UCNA_BASE}/scripts/testing/
+
+echo "Files being saved in "
+pwd
+
+##### Edit these variables to generate the script 	#####
+geom=2011-2012
+useSrcHolder=true
+ptclType=Sn113
+input=${UCNA_BASE}/UCN/EventGenTools/Sn113_o_p/
+output=UCNASimOutput_test
+nEvts=1000000
+
+##### 							#####
+
+rm xuan_geantgen*.mac
+
+# in this loop, set the number of .mac files you want to generate
+for ((x = 0; x < 100; x = x + 1))
+
+do
+
+sed 's/REPLACEWITHGEOMETRY/'$geom'/g' master_geantgen.mac > xuan_geantgen_$x.mac
+# this -i seems to suppress printing out the file to screen. Use it.
+sed -i 's/REPLACEWITHUSESOURCEHOLDER/'$useSrcHolder'/g' xuan_geantgen_$x.mac
+sed -i 's/REPLACEWITHPTCLTYPE/'$ptclType'/g' xuan_geantgen_$x.mac
+# use the | delimiter instead of / since you need to insert a path with "/" characters
+sed -i 's|REPLACEWITHINPUTFILE|'$input\Evts_$x\.root'|g' xuan_geantgen_$x.mac
+sed -i 's/REPLACEWITHOUTPUTFILE/'$output\_$x\.txt'/g' xuan_geantgen_$x.mac
+sed -i 's/REPLACEWITHNUMBEREVENTS/'$nEvts'/g' xuan_geantgen_$x.mac
+
+done
+
+echo "Done running bash script"
