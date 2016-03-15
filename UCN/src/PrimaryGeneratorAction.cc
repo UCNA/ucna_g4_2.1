@@ -247,10 +247,10 @@ void PrimaryGeneratorAction::UseExternalKinFile(int nID)
   {
     G4cout << "------> Fetching initial particles info from: " << sInputFileName << G4endl;
 
-    G4String convertedTree= "Evts_initPtclKin_TTreeToTextFile_" + sOutputFileName;
+    G4String convertedTree = "Evts_initPtclKin_TTreeToTextFile_" + sOutputFileName;
 
     ConvertTreeToTxt(sInputFileName, convertedTree);
-    LoadFile(convertTree);
+    LoadFile(convertedTree);
 
     if(fMyDetector -> GetUseSourceHolder() == false)
     {
