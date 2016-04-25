@@ -398,7 +398,7 @@ double Behrens_Cs137_C(double W, double W0) {
 
 BetaSpectrumGenerator::BetaSpectrumGenerator(double a, double z, double ep): A(a), Z(z), EP(ep),
 W0((EP+m_e)/m_e), R(pow(A,1./3.)*neutron_R0), M0(fabs(Z)*proton_M0+(A-fabs(Z))*neutron_M0),
-forbidden(0), M2_F(0), M2_GT(1), SI(0) { }
+forbidden(0), M2_F(0), M2_GT(1), SI(1) { }
 
 double BetaSpectrumGenerator::spectrumCorrectionFactor(double W) const {
 	double c = WilkinsonF0(Z,W,R);			// Fermi function Coulomb

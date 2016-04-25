@@ -20,11 +20,12 @@
 			// they compile fine on my machine. But if you are having trouble
 			// can remove them and use them as a standalone. These guys only
 			// appear in ConvertTreeToTxt(...). Can do this before sim if ROOT is tricky
-#include	 <TCanvas.h>
-#include	 <TApplication.h>
-#include	 <TROOT.h>
-#include	 <TFile.h>
-#include	 <TTree.h>
+            // I thought we were going to not use ROOT in the sim
+//#include	 <TCanvas.h>
+//#include	 <TApplication.h>
+//#include	 <TROOT.h>
+//#include	 <TFile.h>
+//#include	 <TTree.h>
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC)
 : G4VUserPrimaryGeneratorAction(), G4UImessenger(),

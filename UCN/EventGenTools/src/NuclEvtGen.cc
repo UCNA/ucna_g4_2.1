@@ -237,8 +237,14 @@ betaTF1((f.name+"-"+t.name+"_Beta").c_str(),this,&BetaDecayTrans::evalBeta,0,1,0
 	BSG.forbidden = forbidden;
 	betaTF1.SetNpx(1000);
 	betaTF1.SetRange(0,from.E-to.E);
-	if(from.jpi==to.jpi) { BSG.M2_F = 1; BSG.M2_GT = 0; }
-	else { BSG.M2_GT = 1; BSG.M2_F = 0; } // TODO not strictly true; need more general mechanism to fix
+	if(from.jpi==to.jpi) { 
+        BSG.M2_F = 1; 
+        BSG.M2_GT = 0; 
+    } else { 
+        BSG.M2_GT = 1; 
+        BSG.M2_F = 0; 
+    } // TODO not strictly true; need more general mechanism to fix
+    BSG.SI = 1; // standard model V-A beta decay
 	betaQuantiles = new TF1_Quantiles(betaTF1);
 }
 
@@ -268,15 +274,8 @@ double BetaDecayTrans::evalBeta(double* x, double*) { return BSG.decayProb(x[0])
 FierzDecayTrans::FierzDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden):
     BetaDecayTrans(f, t, pstrn, forbidden) 
 {       
-	//BSG.forbidden = forbidden;
-	//betaTF1.SetNpx(1000);
-	//betaTF1.SetRange(0,from.E-to.E);
-	//if(from.jpi==to.jpi) { BSG.M2_F = 1; BSG.M2_GT = 0; }
-	//else { BSG.M2_GT = 1; BSG.M2_F = 0; } // TODO not strictly true; need more general mechanism to fix
-	//betaQuantiles = new TF1_Quantiles(betaTF1);
-    
-    /// spectral number which is -1 for fierz instead of normal beta decay at zero.
-    BSG.SI = -1;
+    /// spectral number which is 0 for fierz S,T decays, 1 for standard V,A beta decay
+    BSG.SI = 0;
 }
 
 //BetaDecayTrans::~BetaDecayTrans() {
