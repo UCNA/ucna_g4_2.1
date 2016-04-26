@@ -270,12 +270,10 @@ void BetaDecayTrans::run(std::vector<NucDecayEvent>& v, double* rnd) {
 double BetaDecayTrans::evalBeta(double* x, double*) { return BSG.decayProb(x[0]); }
 
 //-----------------------------------------
-
 FierzDecayTrans::FierzDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden):
     BetaDecayTrans(f, t, pstrn, forbidden) 
 {       
-    /// spectral number which is 0 for fierz S,T decays, 1 for standard V,A beta decay
-    BSG.SI = 0;
+    BSG.SI = 0; /// spectral number which is 0 for fierz S,T decays 
 }
 
 //BetaDecayTrans::~BetaDecayTrans() {

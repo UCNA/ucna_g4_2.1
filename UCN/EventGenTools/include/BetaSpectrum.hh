@@ -11,6 +11,7 @@
 // [5] Wilkinson, Evaluation of Beta-Decay V,   NIM A 365 (1995) 497-507
 
 #include <math.h>
+#include <iostream>
 // useful physics constants; several in hbar=m_e=c=1 "natural units"
 const double neutronBetaEp = 782.347;			///< neutron beta decay endpoint, keV
 const double m_e = 511.00;						///< electron mass, keV/c^2
@@ -39,6 +40,7 @@ inline double plainPhaseSpace(double W, double W0=beta_W0) {
 
 /// beta decay with spectral index for BSM decays like Fierz terms (1 for V,A and 0 for S,T)
 inline double spectralIndexPhaseSpace(double W, double W0=beta_W0, int SI=1) { 
+    std::cout << "Spectral index is "<<SI<<".\n";
     if (1.<W and W<W0) 
         return sqrt(W*W-1)*pow(W,SI)*(W0-W)*(W0-W);
     else
