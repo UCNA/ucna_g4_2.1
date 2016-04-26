@@ -5,4 +5,4 @@
 level:	nm = 1.1.0	E = 0.			hl = -1			jpi = 1/2+
 level:	nm = 1.0.0	E = 782.333		hl = 613.9		jpi = 1/2+
 
-fierz:	from = 1.0.0	to = 1.1.0	I = 100.0	M2_F = 1.	M2_GT = 3.
+beta:	from = 1.0.0	to = 1.1.0	I = 100.0	M2_F = 1.	M2_GT = 3.  b_F = inf   b_GT = inf  SI = 0.

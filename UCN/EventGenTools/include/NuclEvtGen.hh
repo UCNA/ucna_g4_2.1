@@ -227,6 +227,7 @@ protected:
 };
 
 /// beta decay transitions
+/*
 class FierzDecayTrans: public BetaDecayTrans {
 public:
 	/// constructor
@@ -250,6 +251,7 @@ protected:
 	//TF1 betaTF1;					///< TF1 for beta spectrum shape
 	//TF1_Quantiles* betaQuantiles;	///< inverse CDF of beta spectrum shape for random point selection
 };
+    */
 
 
 /// Decay system

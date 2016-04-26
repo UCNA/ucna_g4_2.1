@@ -330,10 +330,12 @@ double neutronSpectrumCorrectionFactor(double KE) {
 }
 
 /// beta decay with standard corrected spectrum 
+/*
 double neutronCorrectedBetaSpectrum(double KE) {
 	double W = (KE+m_e)/m_e;
 	return plainPhaseSpace(W,beta_W0)*neutronSpectrumCorrectionFactor(KE);
 }
+*/
 
 /// beta decay with spectral index for BSM decays like Fierz terms (1 for V,A and 0 for S,T)
 double neutronCorrectedSpectralBetaSpectrum(double KE, int SI) {
@@ -428,7 +430,8 @@ double BetaSpectrumGenerator::spectrumCorrectionFactor(double W) const {
 
 double BetaSpectrumGenerator::decayProb(double KE) const {
 	double W = (KE+m_e)/m_e;
-	if(W<1 or W>W0) return 0;
+	if(W<1 or W>W0) 
+        return 0;
 	return spectralIndexPhaseSpace(W,W0,SI)*spectrumCorrectionFactor(W);
 }
 
