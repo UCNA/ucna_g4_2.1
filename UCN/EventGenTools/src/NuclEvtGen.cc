@@ -231,11 +231,12 @@ void ConversionGamma::scale(double s) {
 
 //-----------------------------------------
 
-BetaDecayTrans::BetaDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden):
-TransitionBase(f,t), positron(pstrn), BSG(to.A,to.Z*(positron?-1:1),from.E-to.E),
-betaTF1((f.name+"-"+t.name+"_Beta").c_str(),this,&BetaDecayTrans::evalBeta,0,1,0) {
+BetaDecayTrans::BetaDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden)
+    : TransitionBase(f,t), positron(pstrn), 
+      BSG(to.A,to.Z*(positron?-1:1),from.E-to.E), 
+      betaTF1((f.name+"-"+t.name+"_Beta").c_str(),this,&BetaDecayTrans::evalBeta,0,1,0) {
 	BSG.forbidden = forbidden;
-	betaTF1.SetNpx(100);
+	betaTF1.SetNpx(1000);
 	betaTF1.SetRange(0,from.E-to.E);
 	if(from.jpi==to.jpi) { 
         BSG.M2_F = 1; 
@@ -380,9 +381,9 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 		}
 		if(it->count("SI")) {
 			BD->BSG.SI = it->getDefault("SI",1);
-            std::cout << "Got and SI of "<<BD->BSG.SI<<"\n";
+            std::cout << "Got SI of "<<BD->BSG.SI<<"\n";
 		}
-        std::cout << "Got and SI of "<<BD->BSG.SI<<"\n";
+        std::cout << "Got SI of "<<BD->BSG.SI<<"\n";
 		addTransition(BD);
 	}
 	

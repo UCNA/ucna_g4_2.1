@@ -40,7 +40,8 @@ inline double plainPhaseSpace(double W, double W0=beta_W0) {
 
 /// beta decay with spectral index for BSM decays like Fierz terms (1 for V,A and 0 for S,T)
 inline double spectralIndexPhaseSpace(double W, double W0=beta_W0, int SI=1) { 
-    std::cout << "Spectral index is "<<SI<<".\n";
+    if (int(W * 1000)%1000 == 0)
+        std::cout << "Spectral index is "<<SI<<" on "<<W<<".\n";
     if (1.<W and W<W0) 
         return sqrt(W*W-1)*pow(W,SI)*(W0-W)*(W0-W);
     else
@@ -114,12 +115,12 @@ public:
 	double W0;				///< endpoint total energy, m_e*c^2
 	double R;				///< effective nuclear radius
 	double M0;				///< nuclear mass, m_e*c^2
-	unsigned int forbidden;	///< "forbidden" level of decay
+	unsigned int forbidden;	///< "forbidden" level of decay     // TODO 
 	double M2_F;			///< |M_F|^2 Fermi decay matrix element
 	double M2_GT;			///< |M_GT|^2 Gamov-Teller decay matrix element
-	double b_F;			    ///< b_F Fermi Fierz interference term (can be inf)
-	double b_GT;			///< b_GT Gamov-Teller Fierz interference term (can be inf)
-    int SI;                 ///< Spectral index for including pure Fierz terms (1 for V,A and 0 for S,T)
+	double b_F;			    ///< b_F Fermi Fierz interference term
+	double b_GT;			///< b_GT Gamov-Teller Fierz interference term
+    int SI;                 ///< spectral index for pure Fierz-like terms (1 for V,A and 0 for S,T)
 };
 
 
