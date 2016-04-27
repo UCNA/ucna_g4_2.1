@@ -391,16 +391,18 @@ double Behrens_Cs137_C(double W, double W0) {
 	double l2 = Behrens_lambda_2(W,W0,56,pow(137,1./3.)*neutron_R0);
 	double a1 = 0.000346865*q2 + 0.00331725*l2*p2 - 0.000050327*q2*W + 0.000155636*l2*p2*W + 0.000114834*q2/W;
 	double a2 = -0.00427141*q2 - 0.00645269*l2*p2 + 0.000063321*q2*W - 0.000913829*l2*p2*W - 0.000566409*q2/W + 0.0000576232*l2*p2/W;
-	double a3 =   0.0131499*q2 + 0.00313793*l2*p2 + 0.00151806*q2*W  + 0.000741562*l2*p2*W - 0.000865957*q2/W - 0.000272219*l2*p2/W;
+	double a3 =   0.0131499*q2 + 0.00313793*l2*p2 + 0.001518060*q2*W + 0.000741562*l2*p2*W - 0.000865957*q2/W - 0.000272219*l2*p2/W;
 	double x = 1.07;
 	return a1 + a2*x + a3*x*x;
 }
 
 //-----------------------------------------------------//
 
-BetaSpectrumGenerator::BetaSpectrumGenerator(double a, double z, double ep): A(a), Z(z), EP(ep),
-W0((EP+m_e)/m_e), R(pow(A,1./3.)*neutron_R0), M0(fabs(Z)*proton_M0+(A-fabs(Z))*neutron_M0),
-forbidden(0), M2_F(0), M2_GT(1), SI(1) { }
+BetaSpectrumGenerator::BetaSpectrumGenerator(double a, double z, double ep)
+    : A(a), Z(z), EP(ep), W0((EP+m_e)/m_e), 
+      R(pow(A,1./3.)*neutron_R0), M0(fabs(Z)*proton_M0+(A-fabs(Z))*neutron_M0),
+      forbidden(0), M2_F(0), M2_GT(1), b_F(0), b_GT(0), SI(1) 
+{ }
 
 double BetaSpectrumGenerator::spectrumCorrectionFactor(double W) const {
 	double c = WilkinsonF0(Z,W,R);			// Fermi function Coulomb

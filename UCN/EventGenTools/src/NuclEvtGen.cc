@@ -235,7 +235,7 @@ BetaDecayTrans::BetaDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned in
 TransitionBase(f,t), positron(pstrn), BSG(to.A,to.Z*(positron?-1:1),from.E-to.E),
 betaTF1((f.name+"-"+t.name+"_Beta").c_str(),this,&BetaDecayTrans::evalBeta,0,1,0) {
 	BSG.forbidden = forbidden;
-	betaTF1.SetNpx(1000);
+	betaTF1.SetNpx(100);
 	betaTF1.SetRange(0,from.E-to.E);
 	if(from.jpi==to.jpi) { 
         BSG.M2_F = 1; 
@@ -244,7 +244,7 @@ betaTF1((f.name+"-"+t.name+"_Beta").c_str(),this,&BetaDecayTrans::evalBeta,0,1,0
         BSG.M2_GT = 1; 
         BSG.M2_F = 0; 
     } // TODO not strictly true; need more general mechanism to fix
-    BSG.SI = 1; // standard model V-A beta decay
+    //BSG.SI = 1; // standard model V-A beta decay
 	betaQuantiles = new TF1_Quantiles(betaTF1);
 }
 
@@ -380,7 +380,9 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 		}
 		if(it->count("SI")) {
 			BD->BSG.SI = it->getDefault("SI",1);
+            std::cout << "Got and SI of "<<BD->BSG.SI<<"\n";
 		}
+        std::cout << "Got and SI of "<<BD->BSG.SI<<"\n";
 		addTransition(BD);
 	}
 	
