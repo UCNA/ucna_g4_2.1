@@ -101,7 +101,8 @@ double neutronCorrectedBetaSpectrum(double KE);
 class BetaSpectrumGenerator {
 public:
 	/// constructor
-	BetaSpectrumGenerator(double a, double z, double ep);
+	//BetaSpectrumGenerator(double a, double z, double ep);
+	BetaSpectrumGenerator(double a, double z, double ep, int si);
 	
 	/// shape correction to basic phase space
 	double spectrumCorrectionFactor(double W) const;

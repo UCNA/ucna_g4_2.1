@@ -231,9 +231,9 @@ void ConversionGamma::scale(double s) {
 
 //-----------------------------------------
 
-BetaDecayTrans::BetaDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden)
+BetaDecayTrans::BetaDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned int forbidden, int spectral_index)
     : TransitionBase(f,t), positron(pstrn), 
-      BSG(to.A,to.Z*(positron?-1:1),from.E-to.E), 
+      BSG(to.A, to.Z*(positron?-1:1), from.E-to.E, spectral_index), 
       betaTF1((f.name+"-"+t.name+"_Beta").c_str(),this,&BetaDecayTrans::evalBeta,0,1,0) {
 	BSG.forbidden = forbidden;
 	betaTF1.SetNpx(1000);
@@ -363,7 +363,7 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 		BetaDecayTrans* BD = new BetaDecayTrans(levels[levIndex(it->getDefault("from",""))],
 										levels[levIndex(it->getDefault("to",""))],
 										it->getDefault("positron",0),
-										it->getDefault("forbidden",0));
+										it->getDefault("forbidden",0),1);
 		BD->Itotal = it->getDefault("I",0)/100.0;
 		if(it->count("M2_F") || it->count("M2_GT")) {
 			BD->BSG.M2_F = it->getDefault("M2_F",0);
@@ -378,7 +378,7 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 		BetaDecayTrans* BD = new BetaDecayTrans(levels[levIndex(it->getDefault("from",""))],
                                                   levels[levIndex(it->getDefault("to",""))],
                                                   it->getDefault("positron",0),
-                                                  it->getDefault("forbidden",0));
+                                                  it->getDefault("forbidden",0),0);
 		BD->Itotal = it->getDefault("I",0)/100.0;
 		if(it->count("M2_F") || it->count("M2_GT")) {
 			BD->BSG.M2_F = it->getDefault("M2_F",0);
