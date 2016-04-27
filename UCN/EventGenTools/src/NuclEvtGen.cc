@@ -277,13 +277,7 @@ FierzDecayTrans::FierzDecayTrans(NucLevel& f, NucLevel& t, bool pstrn, unsigned 
 {       
     BSG.SI = 0; /// spectral number which is 0 for fierz S,T decays 
 }
-*/
 
-//BetaDecayTrans::~BetaDecayTrans() {
-//	delete betaQuantiles;
-//}
-
-/*
 void FierzDecayTrans::display(bool verbose) const {
 	printf("Fierz(%.1f) ",from.E-to.E); // TODO Add spectral index, F, GT information?
 	BetaDecayTrans::display(verbose);
@@ -375,23 +369,13 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 			BD->BSG.M2_F = it->getDefault("M2_F",0);
 			BD->BSG.M2_GT = it->getDefault("M2_GT",0);
 		}
-		if(it->count("b_F") || it->count("b_GT")) {
-			BD->BSG.b_F = it->getDefault("b_F",0);
-			BD->BSG.b_GT = it->getDefault("b_GT",0);
-		}
-		if(it->count("SI")) {
-			BD->BSG.SI = it->getDefault("SI",1);
-            std::cout << "Got SI of "<<BD->BSG.SI<<"\n";
-		}
-        std::cout << "Got SI of "<<BD->BSG.SI<<"\n";
 		addTransition(BD);
 	}
 	
-    /*
 	// set up Fierz decays (like beta decay, but with scalar - tensor coupling)
 	std::vector<Stringmap> fierztrans = Q.retrieve("fierz");
 	for(std::vector<Stringmap>::iterator it = fierztrans.begin(); it != fierztrans.end(); it++) {
-		FierzDecayTrans* BD = new FierzDecayTrans(levels[levIndex(it->getDefault("from",""))],
+		BetaDecayTrans* BD = new BetaDecayTrans(levels[levIndex(it->getDefault("from",""))],
                                                   levels[levIndex(it->getDefault("to",""))],
                                                   it->getDefault("positron",0),
                                                   it->getDefault("forbidden",0));
@@ -404,12 +388,13 @@ NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, do
 			BD->BSG.b_F = it->getDefault("b_F",0);
 			BD->BSG.b_GT = it->getDefault("b_GT",0);
 		}
+        /*
 		if(it->count("SI")) {
 			BD->BSG.SI = it->getDefault("SI",1);
-		}
+		}*/
+		BD->BSG.SI = 0;
 		addTransition(BD);
 	}
-    */
 	
 	// set up electron captures
 	std::vector<Stringmap> ecapts = Q.retrieve("ecapt");
