@@ -40,8 +40,8 @@ inline double plainPhaseSpace(double W, double W0=beta_W0) {
 
 /// beta decay with spectral index for BSM decays like Fierz terms (1 for V,A and 0 for S,T)
 inline double spectralIndexPhaseSpace(double W, double W0=beta_W0, int SI=1) { 
-    if (int(W * 1000)%1000 == 0)
-        std::cout << "Spectral index is "<<SI<<" on "<<W<<".\n";
+    //if (int(W * 1000)%1000 == 0)
+    //    std::cout << "Spectral index is "<<SI<<" on "<<W<<".\n";
     if (1.<W and W<W0) 
         return sqrt(W*W-1)*pow(W,SI)*(W0-W)*(W0-W);
     else
