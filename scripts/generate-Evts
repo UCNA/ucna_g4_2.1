@@ -1,0 +1,29 @@
+#!/bin/bash
+# Linux/UNIX box with ssh key based login enabled
+# SSH User name
+
+echo "Generating GNU parallel command files..."
+
+echo "Files being saved in "
+pwd
+
+##### Edit these variables to generate the script 	#####
+polFlag=1
+polSide=W
+nbEvents=10000
+##### 							#####
+
+mkdir n1_f_p_p$polSide
+
+rm GNUParallel_commands.txt
+
+# in this loop, set the number of .mac files you want to generate
+for ((x = 0; x < 10000; x = x + 1))
+
+do
+
+echo './nsm '$nbEvents' n1_f_p_p'$polSide'/Evts_'$x'.root '$polFlag >> GNUParallel_commands.txt
+
+done
+
+echo "Done running bash script"
