@@ -11,18 +11,20 @@ echo "Files being saved in "
 pwd
 
 ##### Edit these variables to generate the script 	#####
-geom=2011-2012
-useSrcHolder=true
-ptclType=Sn113
-input=${UCNA_BASE}/UCN/EventGenTools/Sn113_o_p/
-output=UCNASimOutput_test
+geom=C	#C = 2010, also 2011-2012 is ok
+useSrcHolder=false
+ptclType=external	#options: external, Sn113, Ce139, Bi207
+beta=Base		# anything. But if using external, label as Base or Fierz. Else, say Source
+input=${UCNA_BASE}/UCN/EventGenTools/n1_f_p/
+output=UCNASimOutput
 nEvts=1000000
 ##### 							#####
 
-rm xuan_geantgen*.mac
+rm xuan_geantgen*.mac	# get rid of any .mac files already in the directory
 rm GNUParallel_commands.txt
 
 # in this loop, set the number of .mac files you want to generate
+# this loop variable also counts the Evts_#.root trees you read in. Only used for betas
 for ((x = 0; x < 100; x = x + 1))
 
 do
@@ -33,11 +35,10 @@ sed -i 's/REPLACEWITHUSESOURCEHOLDER/'$useSrcHolder'/g' xuan_geantgen_$x.mac
 sed -i 's/REPLACEWITHPTCLTYPE/'$ptclType'/g' xuan_geantgen_$x.mac
 # use the | delimiter instead of / since you need to insert a path with "/" characters
 sed -i 's|REPLACEWITHINPUTFILE|'$input\Evts_$x\.root'|g' xuan_geantgen_$x.mac
-sed -i 's/REPLACEWITHOUTPUTFILE/'$output\_$ptclType\_$geom'Geom'\_$x\.txt'/g' xuan_geantgen_$x.mac
+sed -i 's/REPLACEWITHOUTPUTFILE/'$output\_$ptclType\_$beta\_$geom'-Geom'\_$x\.txt'/g' xuan_geantgen_$x.mac
 sed -i 's/REPLACEWITHNUMBEREVENTS/'$nEvts'/g' xuan_geantgen_$x.mac
 
 # note the > means pipe to file, >> means append. Use > here
-# also, in order to get it to properly reference x, need to put it outside quotes
 echo './ucn xuan_geantgen_'$x'.mac >> g4_run_'$x'.txt' >> GNUParallel_commands.txt
 
 done
