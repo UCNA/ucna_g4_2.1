@@ -41,7 +41,7 @@ using		 namespace std;
 //required later for plot_program
 TApplication plot_program("FADC_readin",0,0,0,0);
 
-void CreateEvts(TString outFile, Int_t polFlag, Int_t n_events);
+void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events);
 
 int main(int argc, char* argv[])
 {
@@ -55,9 +55,11 @@ int main(int argc, char* argv[])
   Int_t nbEvts = atoi(argv[2]);		// converts argument to int. C lib command.
   Int_t polArg = atoi(argv[1]);		// polarization value
 
+  TRandom3* engine = new TRandom3(0);
+
   for(int i = 0; i < 50; i++)
   {
-    CreateEvts(TString::Format("Evts_%i.root", i), polArg, nbEvts);
+    CreateEvts(engine, TString::Format("Evts_%i.root", i), polArg, nbEvts);
   }
 
 
@@ -65,9 +67,8 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-void CreateEvts(TString outFile, Int_t polFlag, Int_t n_events)
+void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events)
 {
-  TRandom3 factor(0);
 
   Int_t pol = 10000;
   if(polFlag == 0) { pol = -1; }
@@ -121,11 +122,11 @@ void CreateEvts(TString outFile, Int_t polFlag, Int_t n_events)
     // rejection-acceptance sampling using BetaSpectrum.cc neutronCorrectedBetaSpectrum(...), correctedAsymmetry(...)
     while(test_prob > pdf_value)
     {
-      cosTheta_test = 2*factor.Rndm() - 1;      // uniformly sample cos(theta) from -1 to 1
+      cosTheta_test = 2*(factor -> Rndm()) - 1;      // uniformly sample cos(theta) from -1 to 1
 
 //      theta_test = TMath::ACos(cosTheta_test);
-      phi_test = 2*M_PI*factor.Rndm();
-      Te_test = neutronBetaEp*factor.Rndm();    // sample random kinetic energy
+      phi_test = 2*M_PI*(factor -> Rndm());
+      Te_test = neutronBetaEp*(factor -> Rndm());    // sample random kinetic energy
 
 // Xuan's old change trying to add the Asymmetry term by hand before using MPM's
 //      pdf_value = (neutronCorrectedBetaSpectrum(Te_test)*(1 + pol*A0_PDG*beta(Te_test)*TMath::Cos(theta_test))) / normalizer;
@@ -133,7 +134,7 @@ void CreateEvts(TString outFile, Int_t polFlag, Int_t n_events)
       // normalizer is calculated to within 1/10000 precision and used to set the max value of the energy distribution.
       pdf_value = (neutronCorrectedBetaSpectrum(Te_test)*(1 + pol*correctedAsymmetry(Te_test, cosTheta_test))) / normalizer;
 
-      test_prob = factor.Rndm();
+      test_prob = (factor -> Rndm());
     }
 
     if(pdf_value > maxPDF)
@@ -154,10 +155,10 @@ void CreateEvts(TString outFile, Int_t polFlag, Int_t n_events)
     event_pos[1] = 1;
     while(event_pos[0]*event_pos[0] + event_pos[1]*event_pos[1] >= 0.0034129)
     {
-      event_pos[0] = 0.05842*(2*factor.Rndm()-1);       // randomly choose x, y between -0.058 and 0.058m
-      event_pos[1] = 0.05842*(2*factor.Rndm()-1);       // once it passes the radial cut, exit loop
+      event_pos[0] = 0.05842*(2*(factor -> Rndm())-1);       // randomly choose x, y between -0.058 and 0.058m
+      event_pos[1] = 0.05842*(2*(factor -> Rndm())-1);       // once it passes the radial cut, exit loop
     }
-    event_pos[2] = 1.5*(2*factor.Rndm()-1);     // randomly choose z between -1.5 to 1.5m
+    event_pos[2] = 1.5*(2*(factor -> Rndm())-1);     // randomly choose z between -1.5 to 1.5m
 
     event_KE = Te_test;
     event_ptclID = 11;  // stays as electron
