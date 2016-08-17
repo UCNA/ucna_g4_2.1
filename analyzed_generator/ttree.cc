@@ -2,6 +2,7 @@
 
 #define		N_SD			4
 #define		NB_MAX_COINCIDENCES	7
+#define		NB_INPUT_FILES		100
 
 // note to self: this code is meant to get hacked up in order to correctly get the GEANT4 sim output into a TTree
 
@@ -14,32 +15,30 @@ int main()
 {
   // loop, sum and store the .txt version
   // You only need this for multiple files.
-/*  for(int j = 0; j < 10; j++)
+/*  for(int j = 0; j < NB_INPUT_FILES; j++)
   {
-    FillEventInfo(Form("139Ce_Data_10mill/UCNASimOutput_139Ce_%i.txt", j));
+    FillEventInfo(Form("/home/xuansun/Documents/g4_data/10mill_BetaSimData/base/UCNASimOutput_external_Base_C-Geom_%i.txt", j));
     cout << "Event info array is size " << InfoArray.size() << endl;
-    PrintToTxtFile("CoincidenceSummed_139Ce.txt");
+    PrintToTxtFile(Form("CoincidenceSummed_betaBase_C-Geom_%i.txt", j));
     InfoArray.clear();	//  this resets all the entries so we can count again
   }
 */
-
-  // if you have just 1 file that is a source run, use FillEventInfo and PrintToTxtFile once (no loop).
-  FillEventInfo("139Ce_Data_10mill/UCNASimOutput_139Ce_0.txt");
-  cout << "Event info array is size " << InfoArray.size() << endl;
-  PrintToTxtFile("CoincidenceSummed_2011-2012_Ce139.txt");
-
-
-  // if you have betas, just read in a file (or use FillEventInfo, it'll just be longer since it checks for coincidences).
+  // if you have betas, just read in a file (do not use FillEventInfo since you can have memory leaks)
+  // Also, if you are using sources, the PrintToTxtFile argument and ReadAndPrint argument need to be the same
 
   // Store the TTree version
-  TFile file("xuan_analyzed_2011-2012_Ce139.root", "RECREATE");
-  // note: for arrays you don't need to use & deallocator.
-  // Probably cause the array variable is already a pointer.
-  // For primitive types (including wrapper classes _t), you need &.
-  TTree* anaTree = new TTree("anaTree", "tree for analysis");
-  ReadAndPrint("CoincidenceSummed_2011-2012_Ce139.txt", anaTree);
-  anaTree -> Write();
-
+  for(int t = 0; t < NB_INPUT_FILES; t++)
+  {
+    TFile file(Form("xuan_analyzed_%i.root", t), "RECREATE");
+    // note: for arrays you don't need to use & deallocator.
+    // Probably cause the array variable is already a pointer.
+    // For primitive types (including wrapper classes _t), you need &.
+    TTree* anaTree = new TTree("anaTree", "tree for analysis");
+//    ReadAndPrint(Form("CoincidenceSummed_betaBase_C-Geom_%i.txt", t), anaTree);
+    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/100mill_BetaSimData/raw_base/UCNASimOutput_external_Base_C-Geom_%i.txt", t), anaTree);
+    anaTree -> Write();
+    anaTree -> Delete();
+  }
 
   cout << "-------------- End of Program ---------------" << endl;
 
