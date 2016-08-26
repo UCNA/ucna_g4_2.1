@@ -202,8 +202,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Set the geometry dependent settings of our detector
   G4cout << "Using geometry '" << sGeometry << "' ..." << G4endl;
   // Note Michael Brown sets these outside any of the flags.
-  Trap.dCoatingThick = 0.150*um;
-  Trap.dWindowThick = 0.500*um;
+//  Trap.dCoatingThick = 0.150*um;
+//  Trap.dWindowThick = 0.500*um;
   if(sGeometry == "C")
   {
     // "default" thin-windows configuration. This is Michael Mendenhall's default!
