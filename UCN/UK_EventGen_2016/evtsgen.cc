@@ -39,7 +39,7 @@
 using		 namespace std;
 
 //required later for plot_program
-TApplication plot_program("FADC_readin",0,0,0,0);
+//TApplication plot_program("FADC_readin",0,0,0,0);
 
 void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events);
 
