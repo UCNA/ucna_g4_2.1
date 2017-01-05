@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 
   TRandom3* engine = new TRandom3(0);
 
-  for(int i = 0; i < 50; i++)
+  for(int i = 0; i < 1; i++)
   {
     CreateEvts(engine, TString::Format("Evts_%i.root", i), polArg, nbEvts);
   }

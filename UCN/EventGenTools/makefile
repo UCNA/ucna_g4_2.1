@@ -3,7 +3,7 @@
 #####################################
 
 #PATH_USED	= ~/Documents/Caltech/UCNA_Sim/XSun_ucna_G4Sim/UCN/EventGenTools
-PATH_USED	= $(UCNA_BASE)/UCN/EventGenTools
+PATH_USED	= $(shell pwd)/
 CC		= g++
 CXX		= `root-config --cxx`
 CXXFLAGS	= `root-config --cflags`
