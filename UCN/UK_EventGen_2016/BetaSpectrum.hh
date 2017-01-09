@@ -95,8 +95,12 @@ double Behrens_Cs137_C(double W, double W0);
 
 /// combined spectrum correction factor for unpolarized neutron beta decay
 double neutronSpectrumCorrectionFactor(double KE);
+
 /// corrected beta spectrum for unpolarized neutron beta decay
 double neutronCorrectedBetaSpectrum(double KE);
+
+/// corrected beta spectrum for unpolarized neutron beta decay with spectral index for BSM decays
+double neutronCorrectedSpectralBetaSpectrum(double KE, int SI);
 
 /// beta decay spectrum calculating class
 class BetaSpectrumGenerator {
