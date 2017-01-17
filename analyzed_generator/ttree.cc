@@ -13,8 +13,8 @@ void ReadAndPrint(TString inputFileName, TTree* outTree);
 
 int main()
 {
-  // loop, sum and store the .txt version
-  // You only need this for multiple files.
+  // And creates a big .txt file of all the data. Not necessary for converting to trees.
+  // Only used if you want one big tree since you turn all .txt into one big .txt and then make tree.
 /*  for(int j = 0; j < NB_INPUT_FILES; j++)
   {
     FillEventInfo(Form("/home/xuansun/Documents/g4_data/10mill_BetaSimData/base/UCNASimOutput_external_Base_C-Geom_%i.txt", j));
@@ -23,6 +23,8 @@ int main()
     InfoArray.clear();	//  this resets all the entries so we can count again
   }
 */
+
+
   // if you have betas, just read in a file (do not use FillEventInfo since you can have memory leaks)
   // Also, if you are using sources, the PrintToTxtFile argument and ReadAndPrint argument need to be the same
 
@@ -34,8 +36,7 @@ int main()
     // Probably cause the array variable is already a pointer.
     // For primitive types (including wrapper classes _t), you need &.
     TTree* anaTree = new TTree("anaTree", "tree for analysis");
-//    ReadAndPrint(Form("CoincidenceSummed_betaBase_C-Geom_%i.txt", t), anaTree);
-    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/100mill_BetaSimData/raw_base/UCNASimOutput_external_Base_C-Geom_%i.txt", t), anaTree);
+    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/100mill_Betas_Sept2016/raw_fierz/UCNASimOutput_external_Fierz_C-Geom_%i.txt", t), anaTree);
     anaTree -> Write();
     anaTree -> Delete();
   }
@@ -55,7 +56,7 @@ void PrintToTxtFile(TString outName)
   // print out all the info line-by-line into output file which is .txt
   ofstream outfile;
   outfile.open(outName, ios::app);
-  for(int j = 0; j < InfoArray.size(); j++)
+  for(unsigned int j = 0; j < InfoArray.size(); j++)
   {
     outfile << InfoArray[j].eid << "\t" << InfoArray[j].sid << "\t" << InfoArray[j].ke << "\t"
             << InfoArray[j].x << "\t" << InfoArray[j].y << "\t" << InfoArray[j].z << "\t"
@@ -140,7 +141,7 @@ void FillEventInfo(TString fileName)
       }
       else
       {
-        for(int t = (InfoArray.size() - NB_MAX_COINCIDENCES); t < InfoArray.size(); t++)
+        for(unsigned int t = (InfoArray.size() - NB_MAX_COINCIDENCES); t < InfoArray.size(); t++)
         {
           if(evt.eid == InfoArray[t].eid)
           {

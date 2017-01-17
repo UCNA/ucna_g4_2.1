@@ -11,12 +11,12 @@ echo "Files being saved in "
 pwd
 
 ##### Edit these variables to generate the script 	#####
-geom=2011-2012	#C = 2010, also 2011-2012 is ok
+geom=C	#C = 2010, also 2011-2012 is ok
 useSrcHolder=false
-ptclType=external	#options: external, Sn113, Ce139, Bi207
-beta=Base		# anything. But if using external, label as Base or Fierz. Else, say Source
-input=${UCNA_BASE}/UCN/UK_EventGen_2016/Evts_Files/West_50mill/
-output=UCNASimOutput_pol1
+ptclType=external	# options: external, Sn113, Ce139, Bi207
+beta=East		# anything. But if using external, label as Base or Fierz. Else, say Source
+input=${UCNA_BASE}/UCN/UK_EventGen_2016/Evts_Files/East_50mill_2/		# apparently it is for Evts_.root files
+output=UCNASimOutput
 nEvts=1000000
 ##### 							#####
 
