@@ -41,25 +41,26 @@ using		 namespace std;
 //required later for plot_program
 //TApplication plot_program("FADC_readin",0,0,0,0);
 
-void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events);
+void CreateEvts(TRandom3* factor, TString outFile, double pol, double b, int n_events);
 
 int main(int argc, char* argv[])
 {
-  if(argc != 3)
+  if(argc != 4)
   {
     cout << "Incorrect format. Execute with: \n";
-    cout << "(executable) (0 for East, 1 for West) (number of events per file)" << endl;
+    cout << "(executable) (-1 for East, +1 for West, 0 for none) (value of b) (nb events)" << endl;
     return 0;
   }
 
-  Int_t nbEvts = atoi(argv[2]);		// converts argument to int. C lib command.
-  Int_t polArg = atoi(argv[1]);		// polarization value
+  int nbEvts = atoi(argv[3]);		// converts argument to int. C lib command. Getting number of events to gen
+  double polArg = atof(argv[1]);		// polarization value
+  double fierz_b = atof(argv[2]);	// value of fierz term
 
   TRandom3* engine = new TRandom3(0);
 
-  for(int i = 0; i < 50; i++)
+  for(int i = 0; i < 1; i++)
   {
-    CreateEvts(engine, TString::Format("Evts_%i.root", i), polArg, nbEvts);
+    CreateEvts(engine, TString::Format("Evts_%i.root", i), polArg, fierz_b, nbEvts);
   }
 
 
@@ -67,19 +68,19 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events)
+void CreateEvts(TRandom3* factor, TString outFile, double pol, double b, int n_events)
 {
 
-  Int_t pol = 10000;
-  if(polFlag == 0) { pol = -1; }
-  else if(polFlag == 1) { pol = +1; }
-  else { cout << "polarization flag is incorrect." << endl; }
+  if(pol == 0 || pol == -1 || pol == +1) { cout << "Value of polarization: " << pol << endl; }
+  else { cout << "Polarization flag is incorrect." << endl; }
+
+  cout << "Value of b: " << b << endl;
 
   cout << "Saving initial events kinematics in file " << outFile << endl;
   TFile fTree(outFile, "RECREATE");
   TTree* Evts = new TTree("Evts", "initial events kinematics");
 
-  Int_t event_id = -1;  // event ID will be incremented
+  Int_t event_id = -1;  	// event ID will be incremented
   Int_t event_ptclID = 11;      // PDG flag 11 means electron
 
   // randomly throw the kinetic energy
@@ -104,8 +105,15 @@ void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events
   Double_t normalizer = -1;     // find max value of prob distribution, to normalize beta PDF
   for(int i = 0; i < 9999; i++)
   {
-//    Double_t value = neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*(1 - 1*A0_PDG*(beta((neutronBetaEp*i)/10000)));
-    Double_t value = neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*(1 + correctedAsymmetry((neutronBetaEp*i)/10000, -1));
+    // Below is the max value, in 10000 steps, of the 1 + asymm spectra for normalization later
+//    Double_t value = neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*(1 + correctedAsymmetry((neutronBetaEp*i)/10000, -1));
+
+    // Below is max value of 1 + (spectral index on Fierz spectra)
+    // si = 0 is fierz, si = 1 is SM.
+    Double_t value = 1*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 1)
+			+ pol*neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*correctedAsymmetry((neutronBetaEp*i)/10000, -1)
+			+ b*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 0);
+
     if(value > normalizer)
     {
       normalizer = value;
@@ -124,15 +132,17 @@ void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events
     {
       cosTheta_test = 2*(factor -> Rndm()) - 1;      // uniformly sample cos(theta) from -1 to 1
 
-//      theta_test = TMath::ACos(cosTheta_test);
       phi_test = 2*M_PI*(factor -> Rndm());
       Te_test = neutronBetaEp*(factor -> Rndm());    // sample random kinetic energy
 
-// Xuan's old change trying to add the Asymmetry term by hand before using MPM's
-//      pdf_value = (neutronCorrectedBetaSpectrum(Te_test)*(1 + pol*A0_PDG*beta(Te_test)*TMath::Cos(theta_test))) / normalizer;
-
       // normalizer is calculated to within 1/10000 precision and used to set the max value of the energy distribution.
-      pdf_value = (neutronCorrectedBetaSpectrum(Te_test)*(1 + pol*correctedAsymmetry(Te_test, cosTheta_test))) / normalizer;
+      // Done for Standard Model spectra + asymmetric term
+//      pdf_value = (neutronCorrectedBetaSpectrum(Te_test)*(1 + pol*correctedAsymmetry(Te_test, cosTheta_test))) / normalizer;
+
+      // Now done for Standard Model spectra + Fierz term (depending on value of SI)
+      pdf_value = ( 1*neutronCorrectedSpectralBetaSpectrum(Te_test, 1)
+			+ pol*correctedAsymmetry(Te_test, cosTheta_test)*neutronCorrectedBetaSpectrum(Te_test)
+			+ b*neutronCorrectedSpectralBetaSpectrum(Te_test, 0) ) / normalizer;
 
       test_prob = (factor -> Rndm());
     }
@@ -142,7 +152,6 @@ void CreateEvts(TRandom3* factor, TString outFile, Int_t polFlag, Int_t n_events
       maxPDF = pdf_value;
     }
 
-//    event_theta = theta_test;
     event_theta = TMath::ACos(cosTheta_test);
     event_phi = phi_test;
     // set momentum direction. Sufficient to use spherical angles since it is unit vector
