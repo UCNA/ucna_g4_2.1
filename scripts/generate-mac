@@ -11,11 +11,11 @@ echo "Files being saved in "
 pwd
 
 ##### Edit these variables to generate the script 	#####
-geom=C	#C = 2010, also 2011-2012 is ok
+geom=2011-2012	#C = 2010, also 2011-2012 is ok
 useSrcHolder=false
 ptclType=external	# options: external, Sn113, Ce139, Bi207
-beta=East		# anything. But if using external, label as Base or Fierz. Else, say Source
-input=${UCNA_BASE}/UCN/UK_EventGen_2016/Evts_Files/East_50mill_2/		# apparently it is for Evts_.root files
+beta=A_1_b_0		# anything. But if using external, label as Base or Fierz. Else, say Source
+input=${UCNA_BASE}/UCN/UK_EventGen_2016/Evts_Files/FierzWork_2011-2013/2011-2012_geom/A_1_b_0/		# apparently it is for Evts_.root files
 output=UCNASimOutput
 nEvts=1000000
 ##### 							#####
@@ -25,7 +25,7 @@ rm GNUParallel_commands.txt
 
 # in this loop, set the number of .mac files you want to generate
 # this loop variable also counts the Evts_#.root trees you read in. Only used for betas
-for ((x = 0; x < 10; x = x + 1))
+for ((x = 0; x < 20; x = x + 1))
 
 do
 

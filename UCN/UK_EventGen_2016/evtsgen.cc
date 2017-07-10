@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 
   TRandom3* engine = new TRandom3(0);
 
-  for(int i = 0; i < 1; i++)
+  for(int i = 0; i < 20; i++)
   {
     CreateEvts(engine, TString::Format("Evts_%i.root", i), polArg, fierz_b, nbEvts);
   }
@@ -111,7 +111,7 @@ void CreateEvts(TRandom3* factor, TString outFile, double pol, double b, int n_e
     // Below is max value of 1 + (spectral index on Fierz spectra)
     // si = 0 is fierz, si = 1 is SM.
     Double_t value = 1*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 1)
-			+ pol*neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*correctedAsymmetry((neutronBetaEp*i)/10000, -1)
+			+ abs(pol)*neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*correctedAsymmetry((neutronBetaEp*i)/10000, -1)
 			+ b*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 0);
 
     if(value > normalizer)

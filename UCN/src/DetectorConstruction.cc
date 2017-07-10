@@ -203,8 +203,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4cout << "Using geometry '" << sGeometry << "' ..." << G4endl;
   // Note Michael Brown sets these outside any of the flags.
   // I am pretty sure they aren't supposed to be here. Keep them commented out.
-//  Trap.dCoatingThick = 0.150*um;
-//  Trap.dWindowThick = 0.500*um;
+  // They are supposed to be here for 2011/2012, 2012/2013. Not for 2010.
+  Trap.dCoatingThick = 0.150*um;
+  Trap.dWindowThick = 0.500*um;
   if(sGeometry == "C")
   {
     // "default" thin-windows configuration. This is Michael Mendenhall's default!

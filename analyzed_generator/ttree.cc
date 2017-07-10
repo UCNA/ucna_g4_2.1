@@ -2,7 +2,6 @@
 
 #define		N_SD			4
 #define		NB_MAX_COINCIDENCES	7
-#define		NB_INPUT_FILES		100
 
 // note to self: this code is meant to get hacked up in order to correctly get the GEANT4 sim output into a TTree
 
@@ -29,14 +28,14 @@ int main()
   // Also, if you are using sources, the PrintToTxtFile argument and ReadAndPrint argument need to be the same
 
   // Store the TTree version
-  for(int t = 0; t < NB_INPUT_FILES; t++)
+  for(int t = 0; t < 20; t++)
   {
     TFile file(Form("xuan_analyzed_%i.root", t), "RECREATE");
     // note: for arrays you don't need to use & deallocator.
     // Probably cause the array variable is already a pointer.
     // For primitive types (including wrapper classes _t), you need &.
     TTree* anaTree = new TTree("anaTree", "tree for analysis");
-    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/100mill_Betas_Sept2016/raw_fierz/UCNASimOutput_external_Fierz_C-Geom_%i.txt", t), anaTree);
+    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/FierzWork_2011-2013_Sims/A_1_b_0/UCNASimOutput_external_A_1_b_0_2011-2012-Geom_%i.txt", t), anaTree);
     anaTree -> Write();
     anaTree -> Delete();
   }
