@@ -36,6 +36,7 @@ MaterialUser::MaterialUser()
   new G4Element(name="C", symbol="C", z=6, a=12.0107*g/mole);
   new G4Element(name="N", symbol="N", z=7, a=14.0067*g/mole);
   new G4Element(name="O", symbol="O", z=8, a=15.9994*g/mole);
+  new G4Element(name="F", symbol="F", z=9, a=18.9984*g/mole);
   new G4Element(name="Al", symbol="Al",z=13, a=26.9815*g/mole);
   new G4Element(name="Cr", symbol="Cr",z=24, a=51.9961*g/mole);
   new G4Element(name="Fe", symbol="Fe",z=26, a=55.845*g/mole);
