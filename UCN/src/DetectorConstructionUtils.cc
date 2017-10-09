@@ -14,6 +14,7 @@ G4Material* MaterialUser::SS304 = NULL;
 G4Material* MaterialUser::Kevlar = NULL;
 G4Material* MaterialUser::Mylar = NULL;
 G4Material* MaterialUser::Polyethylene = NULL;
+G4Material* MaterialUser::SixFSixF = NULL;
 G4Material* MaterialUser::WCPentane = NULL;
 G4Material* MaterialUser::WCNitrogen = NULL;
 G4Material* MaterialUser::Sci = NULL;
@@ -72,6 +73,14 @@ MaterialUser::MaterialUser()
   Polyethylene = new G4Material("Polyethylene",0.95*g/cm3,2);
   Polyethylene->AddElement(G4Element::GetElement("C"),nAtoms=2);
   Polyethylene->AddElement(G4Element::GetElement("H"),nAtoms=4);
+
+
+  SixFSixF = new G4Material("6F6F",1.48*g/cm3,5);
+  SixFSixF->AddElement(G4Element::GetElement("N"),nAtoms=2);
+  SixFSixF->AddElement(G4Element::GetElement("C"),nAtoms=34); // I count 34, dave had 36
+  SixFSixF->AddElement(G4Element::GetElement("H"),nAtoms=14); // I count 14, dave had 20
+  SixFSixF->AddElement(G4Element::GetElement("O"),nAtoms=4);
+  SixFSixF->AddElement(G4Element::GetElement("F"),nAtoms=12);
 
   // Wirechamber fill: pentane @ 100torr
   double P_MWPC = 100*torr;

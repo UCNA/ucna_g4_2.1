@@ -228,6 +228,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
       Wirechamber[t].ActiveRegion.dCathodeRadius = 39.1*um;
     }
   }
+  else if(sGeometry == "2012-2013")
+  {
+    Trap.mDecayTrapWindowMat = SixFSixF;
+    Trap.dInnerRadiusOfCollimator = 2.25*inch;
+    Trap.dCollimatorThick = 0.75*inch;
+    Trap.dCollimatorLength = 0.25*inch;
+    for(int t = 0; t <= 1; t++)
+    {
+      Wirechamber[t].ActiveRegion.dAnodeRadius = 5*um;
+      Wirechamber[t].ActiveRegion.dCathodeRadius = 39.1*um;
+    }
+  }
   else
     G4cout << "WARNING: PASSED GEOMETRY FLAG DOESN'T MATCH ANY PRE-PROGRAMMED GEOMETRY!" << G4endl;
 

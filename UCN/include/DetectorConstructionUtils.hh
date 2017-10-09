@@ -41,6 +41,7 @@ public:
   static G4Material* Kevlar; 		///< kevlar for wirechamber window support strings
   static G4Material* Mylar; 		///< mylar for windows
   static G4Material* Polyethylene; 	///< poly for collimator
+  static G4Material* SixFSixF;
   static G4Material* WCPentane; 	///< Wirechamber fill: (neo)pentane @ 100torr
   static G4Material* WCNitrogen; 	///< Wirechamber fill: Nitrogen @ 100torr
   static G4Material* Sci; 		///< scintillator material

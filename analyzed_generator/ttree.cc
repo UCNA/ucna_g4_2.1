@@ -35,7 +35,7 @@ int main()
     // Probably cause the array variable is already a pointer.
     // For primitive types (including wrapper classes _t), you need &.
     TTree* anaTree = new TTree("anaTree", "tree for analysis");
-    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/FierzWork_2011-2013_Sims/A_1_b_0/UCNASimOutput_external_A_1_b_0_2011-2012-Geom_%i.txt", t), anaTree);
+    ReadAndPrint(Form("/home/xuansun/Documents/g4_data/FierzWork_2011-2013_Sims/FromSept2017Onwards/b_inf/UCNASimOutput_external_b_inf_2011-2012-Geom_%i.txt", t), anaTree);
     anaTree -> Write();
     anaTree -> Delete();
   }
