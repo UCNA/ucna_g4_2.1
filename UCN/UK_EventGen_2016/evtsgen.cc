@@ -110,9 +110,9 @@ void CreateEvts(TRandom3* factor, TString outFile, double pol, double b, int n_e
 
     // Below is max value of 1 + (spectral index on Fierz spectra)
     // si = 0 is fierz, si = 1 is SM.
-    Double_t value = /*1*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 1)
+    Double_t value = 1*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 1)
 			+ abs(pol)*neutronCorrectedBetaSpectrum((neutronBetaEp*i)/10000)*correctedAsymmetry((neutronBetaEp*i)/10000, -1)
-			+*/ b*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 0);
+			+ b*neutronCorrectedSpectralBetaSpectrum(((neutronBetaEp*i)/10000), 0);
 
     if(value > normalizer)
     {
@@ -140,9 +140,9 @@ void CreateEvts(TRandom3* factor, TString outFile, double pol, double b, int n_e
 //      pdf_value = (neutronCorrectedBetaSpectrum(Te_test)*(1 + pol*correctedAsymmetry(Te_test, cosTheta_test))) / normalizer;
 
       // Now done for Standard Model spectra + Fierz term (depending on value of SI)
-      pdf_value = ( /*1*neutronCorrectedSpectralBetaSpectrum(Te_test, 1)
+      pdf_value = ( 1*neutronCorrectedSpectralBetaSpectrum(Te_test, 1)
 			+ pol*correctedAsymmetry(Te_test, cosTheta_test)*neutronCorrectedBetaSpectrum(Te_test)
-			+ */b*neutronCorrectedSpectralBetaSpectrum(Te_test, 0) ) / normalizer;
+			+ b*neutronCorrectedSpectralBetaSpectrum(Te_test, 0) ) / normalizer;
 
       test_prob = (factor -> Rndm());
     }

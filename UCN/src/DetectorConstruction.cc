@@ -204,21 +204,22 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Note Michael Brown sets these outside any of the flags.
   // I am pretty sure they aren't supposed to be here. Keep them commented out.
   // They are supposed to be here for 2011/2012, 2012/2013. Not for 2010.
-  Trap.dCoatingThick = 0.150*um;
-  Trap.dWindowThick = 0.500*um;
+  Trap.dCoatingThick[0] = Trap.dCoatingThick[1] = 0.150*um;
+  Trap.dWindowThick[0] = Trap.dWindowThick[1] = 0.500*um;
   if(sGeometry == "C")
   {
     // "default" thin-windows configuration. This is Michael Mendenhall's default!
   }
   else if(sGeometry == "thinFoil")
   {
-    Trap.dWindowThick = 0.180*um;
-    Trap.dCoatingThick = 0.150*um;
+    Trap.dWindowThick[0] = 0.130*um;
+    Trap.dWindowThick[1] = 0.180*um;
+    Trap.mDecayTrapWindowMat = SixFSixF;
   }
   else if(sGeometry == "2011-2012")
   {     // Michael Brown's changes that form the 2011/2012 detector geometry
-    Trap.dWindowThick = 0.500*um;
-    Trap.dCoatingThick = 0.150*um;
+    Trap.dWindowThick[0] = Trap.dWindowThick[1] = 0.500*um;
+    Trap.dCoatingThick[0] = Trap.dCoatingThick[1] = 0.150*um;
     Trap.mDecayTrapWindowMat = Mylar;
     Trap.dInnerRadiusOfCollimator = 2.3*inch;
     Trap.dCollimatorThick = 0.7*inch;
@@ -230,6 +231,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   }
   else if(sGeometry == "2012-2013")
   {
+    Trap.dWindowThick[0] = 0.180*um;
+    Trap.dWindowThick[1] = 0.130*um;
     Trap.mDecayTrapWindowMat = SixFSixF;
     Trap.dInnerRadiusOfCollimator = 2.25*inch;
     Trap.dCollimatorThick = 0.75*inch;
